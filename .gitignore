@@ -1,3 +1,6 @@
+# jetbran's ide file
+/.idea
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
