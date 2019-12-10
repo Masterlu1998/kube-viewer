@@ -3,10 +3,9 @@ package terminal
 import (
 	"context"
 
+	"github.com/Masterlu1998/kube-viewer/dataTypes"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/workloadStatus"
 	ui "github.com/gizak/termui/v3"
-	"github.com/gizak/termui/v3/widgets"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,14 +17,9 @@ func Run(cancel context.CancelFunc, s *kScrapper.ScrapperController) error {
 	}
 	defer ui.Close()
 
-	l := widgets.NewList()
-	l.Title = "deployment"
-	l.TextStyle = ui.NewStyle(ui.ColorYellow)
-	l.SetRect(0, 0, 25, 8)
+	tdb := InitDashBoard()
 
-	ui.Render(l)
-
-	go s.ScrapperMap[workloadStatus.WorkloadStatusTypes].GraphAction(l)
+	go deploymentGraphAction(tdb, s.ScrapperMap[dataTypes.DeploymentScrapperTypes])
 
 	for {
 		select {

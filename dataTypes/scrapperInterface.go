@@ -1,11 +1,8 @@
-package common
-
-import "github.com/gizak/termui/v3/widgets"
+package dataTypes
 
 type Scrapper interface {
 	GetScrapperTypes() string
 	ScrapeDataIntoCh() error
-	GraphAction(l *widgets.List) error
 	GetDataCh() <-chan Data
 }
 

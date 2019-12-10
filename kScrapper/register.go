@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/workloadStatus"
+	"github.com/Masterlu1998/kube-viewer/dataTypes"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/deployment"
 	"github.com/Masterlu1998/kube-viewer/kube"
 	"github.com/sirupsen/logrus"
 )
@@ -13,19 +13,19 @@ import (
 const scrapInterval = time.Second * 1
 
 type ScrapperController struct {
-	ScrapperMap map[string]common.Scrapper
+	ScrapperMap map[string]dataTypes.Scrapper
 }
 
 func NewScrapperController(ctx context.Context) (*ScrapperController, error) {
 	s := &ScrapperController{
-		ScrapperMap: make(map[string]common.Scrapper),
+		ScrapperMap: make(map[string]dataTypes.Scrapper),
 	}
 
 	kubeClient, err := kube.GetKubernetesClient()
 	if err != nil {
 		return nil, err
 	}
-	s.RegisterScrappers(workloadStatus.NewWorkloadStatusScrapper(kubeClient))
+	s.RegisterScrappers(deployment.NewDeploymentScrapper(kubeClient))
 
 	ticker := time.NewTicker(scrapInterval)
 
@@ -33,7 +33,7 @@ func NewScrapperController(ctx context.Context) (*ScrapperController, error) {
 	return s, nil
 }
 
-func (s *ScrapperController) RegisterScrappers(sps ...common.Scrapper) {
+func (s *ScrapperController) RegisterScrappers(sps ...dataTypes.Scrapper) {
 	for _, sp := range sps {
 		s.ScrapperMap[sp.GetScrapperTypes()] = sp
 	}
