@@ -1,28 +1,27 @@
 package terminal
 
 import (
-	"errors"
+	"context"
+	"fmt"
 
-	"github.com/Masterlu1998/kube-viewer/dataTypes"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/resource"
 	ui "github.com/gizak/termui/v3"
-	"github.com/sirupsen/logrus"
 )
 
-func deploymentGraphAction(tdb *TerminalDashBoard, s dataTypes.Scrapper) error {
+func workloadGraphAction(ctx context.Context, tdb *TerminalDashBoard, s *resource.ResourceScrapper, workloadTypes resource.ResourceTypes) {
+	s.StartResourceScrapper(ctx, workloadTypes)
 	t := tdb.Table
 	for d := range s.GetDataCh() {
-		workloadSData, ok := d.(dataTypes.DeploymentScrapperChData)
+		workloadSData, ok := d.(resource.WorkloadData)
 		if !ok {
-			logrus.Error("invalid chData type \"chData\"")
-			return errors.New("invalid chData type \"chData\"")
+			continue
 		}
-		t.Rows = make([][]string, 0)
-		workloadTableHeader := []string{"name", "namespace", "pods", "create time", "images"}
-		t.Rows = append(t.Rows, workloadTableHeader)
-
-		for _, wd := range workloadSData.Deployments {
+		t.Rows = [][]string{resourceTableHeader}
+		fmt.Println(workloadSData.Infos)
+		for _, wd := range workloadSData.Infos {
 			var deploymentContent []string
 			deploymentContent = append(deploymentContent,
+				wd.Kind,
 				wd.Name,
 				wd.Namespace,
 				wd.PodsLive+"/"+wd.PodsTotal,
@@ -32,6 +31,4 @@ func deploymentGraphAction(tdb *TerminalDashBoard, s dataTypes.Scrapper) error {
 		}
 		ui.Render(tdb.Grid)
 	}
-
-	return nil
 }

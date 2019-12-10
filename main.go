@@ -5,20 +5,16 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
 	"github.com/Masterlu1998/kube-viewer/terminal"
-	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	logrus.SetFormatter(&logrus.TextFormatter{
-		FullTimestamp: true,
-	})
 
 	ctx, cancel := context.WithCancel(context.Background())
-	s, err := kScrapper.NewScrapperController(ctx)
+	s, err := kScrapper.NewScrapperManagement()
 	if err != nil {
 		panic(err)
 	}
-	err = terminal.Run(cancel, s)
+	err = terminal.Run(ctx, cancel, s)
 	if err != nil {
 		panic(err)
 	}

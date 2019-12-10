@@ -10,11 +10,14 @@ type TerminalDashBoard struct {
 	Grid  *ui.Grid
 }
 
+var resourceTableHeader = []string{"kind", "name", "namespace", "pods", "create time", "images"}
+
 func InitDashBoard() *TerminalDashBoard {
 
 	// init table
 	t := widgets.NewTable()
 	t.TextStyle = ui.NewStyle(ui.ColorWhite)
+	t.Rows = [][]string{resourceTableHeader}
 	t.RowSeparator = false
 	t.TextAlignment = ui.AlignCenter
 
@@ -44,6 +47,8 @@ func InitDashBoard() *TerminalDashBoard {
 			),
 		),
 	)
+
+	ui.Render(grid)
 
 	return &TerminalDashBoard{
 		Table: t,
