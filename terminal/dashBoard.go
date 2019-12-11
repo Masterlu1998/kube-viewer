@@ -1,49 +1,71 @@
 package terminal
 
 import (
+	"github.com/Masterlu1998/kube-viewer/kScrapper/resource"
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 )
 
-type TerminalDashBoard struct {
-	Table *widgets.Table
-	Grid  *ui.Grid
-}
+const (
+	pointer = "* "
+)
 
-var resourceTableHeader = []string{"kind", "name", "namespace", "pods", "create time", "images"}
+var (
+	resourceTypes = []string{
+		string(resource.DeploymentResourceTypes),
+		string(resource.StatefulSetResourceTypes),
+		string(resource.DaemonSetResourceTypes),
+		string(resource.ReplicaSetResourceTypes),
+		string(resource.CronJobResourceTypes),
+		string(resource.JobResourceTypes),
+	}
+)
+
+type TerminalDashBoard struct {
+	ResourceTable *widgets.Table
+	Grid          *ui.Grid
+	NamespaceTab  *widgets.TabPane
+	YamlPanel     *widgets.Paragraph
+	LogPanel      *widgets.Paragraph
+	ResourceTab   *widgets.List
+}
 
 func InitDashBoard() *TerminalDashBoard {
 
-	// init table
-	t := widgets.NewTable()
-	t.TextStyle = ui.NewStyle(ui.ColorWhite)
-	t.Rows = [][]string{resourceTableHeader}
-	t.RowSeparator = false
-	t.TextAlignment = ui.AlignCenter
+	// init resource rTable
+	rTable := widgets.NewTable()
+	rTable.TextStyle = ui.NewStyle(ui.ColorWhite)
+	rTable.Rows = [][]string{{""}}
+	rTable.RowSeparator = false
+	rTable.TextAlignment = ui.AlignCenter
 
-	//
-	namespaceTab := widgets.NewTabPane("default", "nginx")
+	// init namespace tab
+	nTab := widgets.NewTabPane("default", "nginx")
 
-	//
-	p := widgets.NewParagraph()
-	p.Text = "Resource"
+	// init resource tab
+	rTab := widgets.NewList()
+	rTab.Rows = make([]string, len(resourceTypes))
+	copy(rTab.Rows, resourceTypes)
 
-	//
-	propertyPanel := widgets.NewParagraph()
-	propertyPanel.Title = "Resource property"
-	propertyPanel.Text = "status: running"
+	// yaml panel
+	yPanel := widgets.NewParagraph()
+	yPanel.Title = "Resource Yaml"
+
+	// log panel
+	lPanel := widgets.NewParagraph()
+	lPanel.Title = "Log"
 
 	grid := ui.NewGrid()
 	termWidth, termHeight := ui.TerminalDimensions()
 	grid.SetRect(0, 0, termWidth, termHeight)
 	grid.Set(
-		ui.NewRow(1.0/12, namespaceTab),
+		ui.NewRow(1.0/12, nTab),
 		ui.NewRow(11.0/12,
-			ui.NewCol(1.0/10, ui.NewRow(1.0, p)),
-			ui.NewCol(6.0/10, ui.NewRow(1.0, t)),
+			ui.NewCol(1.0/10, ui.NewRow(1.0, rTab)),
+			ui.NewCol(6.0/10, ui.NewRow(1.0, rTable)),
 			ui.NewCol(3.0/10,
-				ui.NewRow(1.0/4, propertyPanel),
-				ui.NewRow(3.0/4, propertyPanel),
+				ui.NewRow(1.0/4, yPanel),
+				ui.NewRow(3.0/4, yPanel),
 			),
 		),
 	)
@@ -51,7 +73,25 @@ func InitDashBoard() *TerminalDashBoard {
 	ui.Render(grid)
 
 	return &TerminalDashBoard{
-		Table: t,
-		Grid:  grid,
+		Grid:          grid,
+		ResourceTable: rTable,
+		ResourceTab:   rTab,
+		NamespaceTab:  nTab,
+		YamlPanel:     yPanel,
+		LogPanel:      lPanel,
 	}
+}
+
+func (t *TerminalDashBoard) RemoveResourcePointer(index int) {
+	t.ResourceTab.Rows[index] = resourceTypes[index]
+}
+
+func (t *TerminalDashBoard) AddResourcePointer(index int) {
+	t.ResourceTab.Rows[index] = pointer + resourceTypes[index]
+}
+
+func (t *TerminalDashBoard) Resize() {
+	termWidth, termHeight := ui.TerminalDimensions()
+	t.Grid.SetRect(0, 0, termWidth, termHeight)
+	ui.Render(t.Grid)
 }

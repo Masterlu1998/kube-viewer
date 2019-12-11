@@ -13,52 +13,6 @@ type kubeAccessor struct {
 	kubernetesClient kubernetes.Interface
 }
 
-func (ka *kubeAccessor) getDeployments() ([]WorkloadInfo, error) {
-	deployments, err := ka.kubernetesClient.AppsV1().Deployments("").List(v1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	var deploymentInfos []WorkloadInfo
-	for _, d := range deployments.Items {
-		dInfo := WorkloadInfo{
-			Kind:       "deployment",
-			Name:       d.Name,
-			Namespace:  d.Namespace,
-			PodsLive:   strconv.Itoa(int(d.Status.ReadyReplicas)),
-			PodsTotal:  strconv.Itoa(int(d.Status.Replicas)),
-			CreateTime: d.ObjectMeta.CreationTimestamp.Format(time.RFC3339),
-			Images:     d.Spec.Template.Spec.Containers[0].Image,
-		}
-		deploymentInfos = append(deploymentInfos, dInfo)
-	}
-
-	return deploymentInfos, nil
-}
-
-func (ka *kubeAccessor) getStatefulSets() ([]WorkloadInfo, error) {
-	statefulSetList, err := ka.kubernetesClient.AppsV1().StatefulSets("").List(v1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	var statefulSetInfos []WorkloadInfo
-	for _, s := range statefulSetList.Items {
-		sInfo := WorkloadInfo{
-			Kind:       "statefulSet",
-			Name:       s.Name,
-			Namespace:  s.Namespace,
-			PodsLive:   strconv.Itoa(int(s.Status.ReadyReplicas)),
-			PodsTotal:  strconv.Itoa(int(s.Status.Replicas)),
-			CreateTime: s.ObjectMeta.CreationTimestamp.Format(time.RFC3339),
-			Images:     s.Spec.Template.Spec.Containers[0].Image,
-		}
-		statefulSetInfos = append(statefulSetInfos, sInfo)
-	}
-
-	return statefulSetInfos, nil
-}
-
 func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInfo, error) {
 	var workloadInfos []WorkloadInfo
 	switch workloadTypes {
@@ -70,7 +24,6 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 
 		for _, item := range deployments.Items {
 			sInfo := WorkloadInfo{
-				Kind:       "statefulSet",
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   strconv.Itoa(int(item.Status.ReadyReplicas)),
@@ -88,7 +41,6 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 
 		for _, item := range statefulSetList.Items {
 			sInfo := WorkloadInfo{
-				Kind:       "statefulSet",
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   strconv.Itoa(int(item.Status.ReadyReplicas)),
@@ -106,7 +58,6 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 
 		for _, item := range daemonSetList.Items {
 			sInfo := WorkloadInfo{
-				Kind:       "statefulSet",
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   "per node",
@@ -124,7 +75,6 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 
 		for _, item := range replicaSetList.Items {
 			sInfo := WorkloadInfo{
-				Kind:       "statefulSet",
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   strconv.Itoa(int(item.Status.ReadyReplicas)),
@@ -142,7 +92,6 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 
 		for _, item := range replicaSetList.Items {
 			sInfo := WorkloadInfo{
-				Kind:       "statefulSet",
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   "null",
@@ -160,7 +109,6 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 
 		for _, item := range replicaSetList.Items {
 			sInfo := WorkloadInfo{
-				Kind:       "statefulSet",
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   "null",
@@ -172,24 +120,6 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 		}
 	default:
 		return nil, errors.New("invalid ")
-	}
-
-	statefulSetList, err := ka.kubernetesClient.AppsV1().StatefulSets("").List(v1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	for _, s := range statefulSetList.Items {
-		sInfo := WorkloadInfo{
-			Kind:       "statefulSet",
-			Name:       s.Name,
-			Namespace:  s.Namespace,
-			PodsLive:   strconv.Itoa(int(s.Status.ReadyReplicas)),
-			PodsTotal:  strconv.Itoa(int(s.Status.Replicas)),
-			CreateTime: s.ObjectMeta.CreationTimestamp.Format(time.RFC3339),
-			Images:     s.Spec.Template.Spec.Containers[0].Image,
-		}
-		workloadInfos = append(workloadInfos, sInfo)
 	}
 
 	return workloadInfos, nil

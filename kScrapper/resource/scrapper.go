@@ -17,12 +17,12 @@ const (
 type ResourceTypes string
 
 const (
-	DeploymentResourceTypes  ResourceTypes = "deployment"
-	StatefulSetResourceTypes ResourceTypes = "statefulSet"
-	DaemonSetResourceTypes   ResourceTypes = "daemonSet"
-	ReplicaSetResourceTypes  ResourceTypes = "replicaSet"
-	CronJobResourceTypes     ResourceTypes = "cronJob"
-	JobResourceTypes         ResourceTypes = "jobResource"
+	DeploymentResourceTypes  ResourceTypes = "Deployment"
+	StatefulSetResourceTypes ResourceTypes = "StatefulSet"
+	DaemonSetResourceTypes   ResourceTypes = "DaemonSet"
+	ReplicaSetResourceTypes  ResourceTypes = "ReplicaSet"
+	CronJobResourceTypes     ResourceTypes = "CronJob"
+	JobResourceTypes         ResourceTypes = "Job"
 )
 
 type WorkloadData struct {
@@ -30,7 +30,6 @@ type WorkloadData struct {
 }
 
 type WorkloadInfo struct {
-	Kind       string
 	Name       string
 	Namespace  string
 	PodsLive   string
@@ -66,15 +65,16 @@ func (w *ResourceScrapper) GetDataCh() <-chan kubernetesData {
 }
 
 func (w *ResourceScrapper) StartResourceScrapper(ctx context.Context, types ResourceTypes) {
+	w.StopResourceScrapper()
 	w.ch = make(chan kubernetesData)
 	ownCtx, ownCancel := context.WithCancel(ctx)
 	w.ownCtx, w.ownCancel = ownCtx, ownCancel
-	go func() {
+	go func(ownCtx, ctx context.Context) {
 		ticker := time.NewTicker(scrapInterval)
 		defer ticker.Stop()
 		for {
 			select {
-			case <-w.ownCtx.Done():
+			case <-ownCtx.Done():
 				return
 			case <-ctx.Done():
 				return
@@ -82,7 +82,7 @@ func (w *ResourceScrapper) StartResourceScrapper(ctx context.Context, types Reso
 				_ = w.scrapeDataIntoCh(types)
 			}
 		}
-	}()
+	}(w.ownCtx, ctx)
 }
 
 func (w *ResourceScrapper) scrapeDataIntoCh(resourceTypes ResourceTypes) error {

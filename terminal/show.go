@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/resource"
 	ui "github.com/gizak/termui/v3"
 )
 
@@ -17,20 +16,8 @@ func Run(ctx context.Context, cancel context.CancelFunc, s *kScrapper.ScrapperMa
 
 	tdb := InitDashBoard()
 
-	go workloadGraphAction(ctx, tdb, s.ResourceScrapper, resource.DeploymentResourceTypes)
+	eventListener := newEventListener(ctx, tdb, cancel, s)
+	eventListener.Register("/workload/list", workloadGraphAction)
 
-	for {
-		select {
-		case e := <-ui.PollEvents():
-			if e.Type == ui.MouseEvent {
-				cancel()
-				return nil
-
-			}
-			if e.Type == ui.KeyboardEvent {
-				s.ResourceScrapper.StopResourceScrapper()
-				go workloadGraphAction(ctx, tdb, s.ResourceScrapper, resource.StatefulSetResourceTypes)
-			}
-		}
-	}
+	return eventListener.Listen()
 }
