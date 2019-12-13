@@ -4,11 +4,12 @@ import (
 	"context"
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 )
 
 // we will show graph in terminal here
-func Run(ctx context.Context, cancel context.CancelFunc, s *kScrapper.ScrapperManagement) error {
+func Run(ctx context.Context, cancel context.CancelFunc, sm *kScrapper.ScrapperManagement) error {
 	if err := ui.Init(); err != nil {
 		return err
 	}
@@ -16,8 +17,9 @@ func Run(ctx context.Context, cancel context.CancelFunc, s *kScrapper.ScrapperMa
 
 	tdb := InitDashBoard()
 
-	eventListener := newEventListener(ctx, tdb, cancel, s)
-	eventListener.Register("/workload/list", workloadGraphAction)
+	eventListener := newEventListener(ctx, tdb, cancel, sm)
+
+	eventListener.Register("/"+workload.DeploymentResourceTypes+"/list", DeploymentGraphAction)
 
 	return eventListener.Listen()
 }

@@ -1,7 +1,7 @@
 package terminal
 
 import (
-	"github.com/Masterlu1998/kube-viewer/kScrapper/resource"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 )
@@ -12,12 +12,12 @@ const (
 
 var (
 	resourceTypes = []string{
-		string(resource.DeploymentResourceTypes),
-		string(resource.StatefulSetResourceTypes),
-		string(resource.DaemonSetResourceTypes),
-		string(resource.ReplicaSetResourceTypes),
-		string(resource.CronJobResourceTypes),
-		string(resource.JobResourceTypes),
+		workload.DeploymentResourceTypes,
+		workload.StatefulSetResourceTypes,
+		workload.DaemonSetResourceTypes,
+		workload.ReplicaSetResourceTypes,
+		workload.CronJobResourceTypes,
+		workload.JobResourceTypes,
 	}
 )
 
@@ -32,7 +32,7 @@ type TerminalDashBoard struct {
 
 func InitDashBoard() *TerminalDashBoard {
 
-	// init resource rTable
+	// init workload rTable
 	rTable := widgets.NewTable()
 	rTable.TextStyle = ui.NewStyle(ui.ColorWhite)
 	rTable.Rows = [][]string{{""}}
@@ -42,7 +42,7 @@ func InitDashBoard() *TerminalDashBoard {
 	// init namespace tab
 	nTab := widgets.NewTabPane("default", "nginx")
 
-	// init resource tab
+	// init workload tab
 	rTab := widgets.NewList()
 	rTab.Rows = make([]string, len(resourceTypes))
 	copy(rTab.Rows, resourceTypes)
@@ -70,8 +70,6 @@ func InitDashBoard() *TerminalDashBoard {
 		),
 	)
 
-	ui.Render(grid)
-
 	return &TerminalDashBoard{
 		Grid:          grid,
 		ResourceTable: rTable,
@@ -94,4 +92,12 @@ func (t *TerminalDashBoard) Resize() {
 	termWidth, termHeight := ui.TerminalDimensions()
 	t.Grid.SetRect(0, 0, termWidth, termHeight)
 	ui.Render(t.Grid)
+}
+
+func (t *TerminalDashBoard) MoveTabLeft() {
+	t.NamespaceTab.FocusLeft()
+}
+
+func (t *TerminalDashBoard) MoveTabRight() {
+	t.NamespaceTab.FocusRight()
 }

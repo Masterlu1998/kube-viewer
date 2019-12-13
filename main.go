@@ -10,11 +10,11 @@ import (
 func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
-	s, err := kScrapper.NewScrapperManagement()
+	sm, err := kScrapper.NewScrapperManagement()
 	if err != nil {
 		panic(err)
 	}
-	err = terminal.Run(ctx, cancel, s)
+	err = terminal.Run(ctx, cancel, sm)
 	if err != nil {
 		panic(err)
 	}

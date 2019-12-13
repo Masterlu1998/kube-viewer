@@ -1,4 +1,4 @@
-package resource
+package workload
 
 import (
 	"errors"
@@ -9,15 +9,24 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+type WorkloadInfo struct {
+	Name       string
+	Namespace  string
+	PodsLive   string
+	PodsTotal  string
+	CreateTime string
+	Images     string
+}
+
 type kubeAccessor struct {
 	kubernetesClient kubernetes.Interface
 }
 
-func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInfo, error) {
+func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]WorkloadInfo, error) {
 	var workloadInfos []WorkloadInfo
 	switch workloadTypes {
 	case DeploymentResourceTypes:
-		deployments, err := ka.kubernetesClient.AppsV1().Deployments("").List(v1.ListOptions{})
+		deployments, err := ka.kubernetesClient.AppsV1().Deployments(namespace).List(v1.ListOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -34,7 +43,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case StatefulSetResourceTypes:
-		statefulSetList, err := ka.kubernetesClient.AppsV1().StatefulSets("").List(v1.ListOptions{})
+		statefulSetList, err := ka.kubernetesClient.AppsV1().StatefulSets(namespace).List(v1.ListOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -51,7 +60,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case DaemonSetResourceTypes:
-		daemonSetList, err := ka.kubernetesClient.AppsV1().DaemonSets("").List(v1.ListOptions{})
+		daemonSetList, err := ka.kubernetesClient.AppsV1().DaemonSets(namespace).List(v1.ListOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +77,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case ReplicaSetResourceTypes:
-		replicaSetList, err := ka.kubernetesClient.AppsV1().ReplicaSets("").List(v1.ListOptions{})
+		replicaSetList, err := ka.kubernetesClient.AppsV1().ReplicaSets(namespace).List(v1.ListOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -85,7 +94,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case JobResourceTypes:
-		replicaSetList, err := ka.kubernetesClient.BatchV1().Jobs("").List(v1.ListOptions{})
+		replicaSetList, err := ka.kubernetesClient.BatchV1().Jobs(namespace).List(v1.ListOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +111,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes ResourceTypes) ([]WorkloadInf
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case CronJobResourceTypes:
-		replicaSetList, err := ka.kubernetesClient.BatchV1beta1().CronJobs("").List(v1.ListOptions{})
+		replicaSetList, err := ka.kubernetesClient.BatchV1beta1().CronJobs(namespace).List(v1.ListOptions{})
 		if err != nil {
 			return nil, err
 		}

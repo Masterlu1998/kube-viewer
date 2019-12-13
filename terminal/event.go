@@ -4,18 +4,19 @@ import (
 	"context"
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/resource"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 )
 
 var (
-	resourceTypesList = []resource.ResourceTypes{
-		resource.DeploymentResourceTypes,
-		resource.StatefulSetResourceTypes,
-		resource.DaemonSetResourceTypes,
-		resource.ReplicaSetResourceTypes,
-		resource.CronJobResourceTypes,
-		resource.JobResourceTypes,
+	resourceTypesList = []string{
+		workload.DeploymentResourceTypes,
+		workload.StatefulSetResourceTypes,
+		workload.DaemonSetResourceTypes,
+		workload.ReplicaSetResourceTypes,
+		workload.CronJobResourceTypes,
+		workload.JobResourceTypes,
 	}
 )
 
@@ -23,22 +24,22 @@ type eventListener struct {
 	ctx                context.Context
 	tdb                *TerminalDashBoard
 	cancelFunc         context.CancelFunc
-	resourceTypesList  []resource.ResourceTypes
+	resourceTypesList  []string
 	namespacesList     []string
 	pathHandlerMap     map[string]handler
 	resourceTypesIndex int
 	namespacesIndex    int
-	resourceScrapper   *resource.ResourceScrapper
+	scrapperManagement *kScrapper.ScrapperManagement
 }
 
-type handler func(ctx context.Context, tdb *TerminalDashBoard, s *resource.ResourceScrapper, workloadTypes resource.ResourceTypes)
+type handler func(ctx context.Context, tdb *TerminalDashBoard, sm *kScrapper.ScrapperManagement, namespace string)
 
-func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel context.CancelFunc, s *kScrapper.ScrapperManagement) *eventListener {
+func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel context.CancelFunc, sm *kScrapper.ScrapperManagement) *eventListener {
 	return &eventListener{
 		ctx:                ctx,
 		tdb:                tdb,
 		cancelFunc:         cancel,
-		resourceScrapper:   s.ResourceScrapper,
+		scrapperManagement: sm,
 		resourceTypesList:  resourceTypesList,
 		namespacesList:     []string{""},
 		pathHandlerMap:     make(map[string]handler),
@@ -52,8 +53,10 @@ func (el *eventListener) Register(path string, h handler) {
 }
 
 func (el *eventListener) Listen() error {
-	go el.pathHandlerMap["/workload/list"](el.ctx, el.tdb, el.resourceScrapper, el.resourceTypesList[el.resourceTypesIndex])
+	el.executeHandler("/" + el.resourceTypesList[el.resourceTypesIndex] + "/list")
 	el.tdb.AddResourcePointer(0)
+	el.syncNamespace()
+
 	for {
 		e := <-ui.PollEvents()
 		switch e.ID {
@@ -62,23 +65,63 @@ func (el *eventListener) Listen() error {
 		case "q":
 			el.cancelFunc()
 			return nil
+		case "<Left>":
+			el.tdb.MoveTabLeft()
+			if el.namespacesIndex > 0 {
+				el.namespacesIndex = el.namespacesIndex - 1
+			}
+			path := "/" + el.resourceTypesList[el.resourceTypesIndex] + "/list"
+			el.executeHandler(path)
+		case "<Right>":
+			el.tdb.MoveTabRight()
+			if el.namespacesIndex < len(el.namespacesList) {
+				el.namespacesIndex = el.namespacesIndex + 1
+			}
+			path := "/" + el.resourceTypesList[el.resourceTypesIndex] + "/list"
+			el.executeHandler(path)
 		case "<Up>":
 			el.tdb.RemoveResourcePointer(el.resourceTypesIndex)
 			if el.resourceTypesIndex > 0 {
 				el.resourceTypesIndex = el.resourceTypesIndex - 1
 			}
 			el.tdb.AddResourcePointer(el.resourceTypesIndex)
-			path := "/workload/list"
-			go el.pathHandlerMap[path](el.ctx, el.tdb, el.resourceScrapper, el.resourceTypesList[el.resourceTypesIndex])
+			path := "/" + el.resourceTypesList[el.resourceTypesIndex] + "/list"
+			el.executeHandler(path)
 		case "<Down>":
 			el.tdb.RemoveResourcePointer(el.resourceTypesIndex)
 			if el.resourceTypesIndex < len(el.resourceTypesList)-1 {
 				el.resourceTypesIndex = el.resourceTypesIndex + 1
 			}
 			el.tdb.AddResourcePointer(el.resourceTypesIndex)
-			path := "/workload/list"
-			go el.pathHandlerMap[path](el.ctx, el.tdb, el.resourceScrapper, el.resourceTypesList[el.resourceTypesIndex])
+			path := "/" + el.resourceTypesList[el.resourceTypesIndex] + "/list"
+			el.executeHandler(path)
 		}
 
 	}
+}
+
+func (el *eventListener) executeHandler(path string) {
+	if handler, ok := el.pathHandlerMap[path]; ok {
+		go handler(el.ctx, el.tdb, el.scrapperManagement, el.namespacesList[el.namespacesIndex])
+	}
+
+	return
+}
+
+func (el *eventListener) syncNamespace() {
+	nc := el.scrapperManagement.ScrapperMap[namespace.NamespaceScrapperTypes]
+	nc.StartScrapper(el.ctx, "")
+	go func() {
+		for {
+			select {
+			case ns := <-nc.Watch():
+				namespaces := ns.([]string)
+				el.namespacesList = namespaces
+				el.tdb.NamespaceTab.TabNames = namespaces
+				ui.Render(el.tdb.Grid)
+			case <-el.ctx.Done():
+				return
+			}
+		}
+	}()
 }

@@ -3,22 +3,23 @@ package terminal
 import (
 	"context"
 
-	"github.com/Masterlu1998/kube-viewer/kScrapper/resource"
+	"github.com/Masterlu1998/kube-viewer/kScrapper"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 )
 
-var resourceTableHeader = []string{"name", "namespace", "pods", "create time", "images"}
-
-func workloadGraphAction(ctx context.Context, tdb *TerminalDashBoard, s *resource.ResourceScrapper, workloadTypes resource.ResourceTypes) {
-	s.StartResourceScrapper(ctx, workloadTypes)
+func DeploymentGraphAction(ctx context.Context, tdb *TerminalDashBoard, sm *kScrapper.ScrapperManagement, namespace string) {
+	s := sm.ScrapperMap[workload.ResourceScrapperTypes]
+	s.StartScrapper(ctx, namespace)
 	t := tdb.ResourceTable
-	for d := range s.GetDataCh() {
-		workloadSData, ok := d.(resource.WorkloadData)
+	for d := range s.Watch() {
+		workloadSData, ok := d.([]workload.WorkloadInfo)
 		if !ok {
 			continue
 		}
-		t.Rows = [][]string{resourceTableHeader}
-		for _, wd := range workloadSData.Infos {
+
+		t.Rows = [][]string{{"name", "namespace", "pods", "create time", "images"}}
+		for _, wd := range workloadSData {
 			var deploymentContent []string
 			deploymentContent = append(deploymentContent,
 				wd.Name,
@@ -30,4 +31,5 @@ func workloadGraphAction(ctx context.Context, tdb *TerminalDashBoard, s *resourc
 		}
 		ui.Render(tdb.Grid)
 	}
+
 }
