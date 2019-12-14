@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Masterlu1998/kube-viewer/dataTypes"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -22,7 +22,7 @@ const (
 
 type DeploymentScrapper struct {
 	stop          chan bool
-	ch            chan dataTypes.KubernetesData
+	ch            chan common.KubernetesData
 	kubeAccessor  *kubeAccessor
 	resourceTypes string
 	namespace     string
@@ -43,17 +43,17 @@ func (w *DeploymentScrapper) GetScrapperTypes() string {
 	return ResourceScrapperTypes
 }
 
-func (w *DeploymentScrapper) Watch() <-chan dataTypes.KubernetesData {
+func (w *DeploymentScrapper) Watch() <-chan common.KubernetesData {
 	return w.ch
 }
 
 func (w *DeploymentScrapper) StartScrapper(ctx context.Context) {
 	w.stopResourceScrapper()
-	w.ch = make(chan dataTypes.KubernetesData)
+	w.ch = make(chan common.KubernetesData)
 	w.stop = make(chan bool)
 
 	go func(ctx context.Context, stop chan bool) {
-		ticker := time.NewTicker(dataTypes.ScrapInterval)
+		ticker := time.NewTicker(common.ScrapInterval)
 		defer ticker.Stop()
 		for {
 			select {

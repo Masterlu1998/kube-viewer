@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	pointer = "->"
+	pointer = "-> "
 )
 
 var (
@@ -62,11 +62,11 @@ func InitDashBoard() *TerminalDashBoard {
 		ui.NewRow(1.0/12, nTab),
 		ui.NewRow(11.0/12,
 			ui.NewCol(1.0/10, ui.NewRow(1.0, rTab)),
-			ui.NewCol(6.0/10, ui.NewRow(1.0, rTable)),
-			ui.NewCol(3.0/10,
-				ui.NewRow(1.0/4, yPanel),
-				ui.NewRow(3.0/4, yPanel),
-			),
+			ui.NewCol(9.0/10, ui.NewRow(1.0, rTable)),
+			// ui.NewCol(3.0/10,
+			// 	ui.NewRow(1.0/4, yPanel),
+			// 	ui.NewRow(3.0/4, yPanel),
+			// ),
 		),
 	)
 

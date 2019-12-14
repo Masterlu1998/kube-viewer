@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Masterlu1998/kube-viewer/dataTypes"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -15,7 +15,7 @@ const (
 
 type NamespaceScrapper struct {
 	stop         chan bool
-	ch           chan dataTypes.KubernetesData
+	ch           chan common.KubernetesData
 	kubeAccessor *kubeAccessor
 	namespace    string
 }
@@ -35,17 +35,17 @@ func (w *NamespaceScrapper) GetScrapperTypes() string {
 	return NamespaceScrapperTypes
 }
 
-func (w *NamespaceScrapper) Watch() <-chan dataTypes.KubernetesData {
+func (w *NamespaceScrapper) Watch() <-chan common.KubernetesData {
 	return w.ch
 }
 
 func (w *NamespaceScrapper) StartScrapper(ctx context.Context) {
 	w.stopResourceScrapper()
-	w.ch = make(chan dataTypes.KubernetesData)
+	w.ch = make(chan common.KubernetesData)
 	w.stop = make(chan bool)
 
 	go func(ctx context.Context, stop chan bool) {
-		ticker := time.NewTicker(dataTypes.ScrapInterval)
+		ticker := time.NewTicker(common.ScrapInterval)
 		defer ticker.Stop()
 		for {
 			select {
