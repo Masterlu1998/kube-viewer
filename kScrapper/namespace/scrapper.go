@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
+	"github.com/Masterlu1998/kube-viewer/kube"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -20,9 +21,10 @@ type NamespaceScrapper struct {
 	namespace    string
 }
 
-func NewNamespaceScrapper(client *kubernetes.Clientset, namespace string) *NamespaceScrapper {
+func NewNamespaceScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, namespace string) *NamespaceScrapper {
 	ka := &kubeAccessor{
 		kubernetesClient: client,
+		kubernetesLister: lister,
 	}
 
 	return &NamespaceScrapper{

@@ -17,15 +17,17 @@ type Scrapper interface {
 	SetNamespace(namespace string)
 }
 
-func NewScrapperManagement() (*ScrapperManagement, error) {
+func NewScrapperManagement(ctx context.Context) (*ScrapperManagement, error) {
 	kubeClient, err := kube.GetKubernetesClient()
 	if err != nil {
 		return nil, err
 	}
 
+	kubeLister := kube.NewKubeLister(ctx, kubeClient)
+
 	sMap := map[string]Scrapper{
-		workload.ResourceScrapperTypes:   workload.NewDeploymentScrapper(kubeClient, ""),
-		namespace.NamespaceScrapperTypes: namespace.NewNamespaceScrapper(kubeClient, ""),
+		workload.ResourceScrapperTypes:   workload.NewDeploymentScrapper(kubeLister, kubeClient, ""),
+		namespace.NamespaceScrapperTypes: namespace.NewNamespaceScrapper(kubeLister, kubeClient, ""),
 	}
 
 	return &ScrapperManagement{

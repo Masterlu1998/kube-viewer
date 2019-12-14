@@ -2,10 +2,12 @@ package workload
 
 import (
 	"errors"
+	"sort"
 	"strconv"
 	"time"
 
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/Masterlu1998/kube-viewer/kube"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -20,18 +22,19 @@ type WorkloadInfo struct {
 
 type kubeAccessor struct {
 	kubernetesClient kubernetes.Interface
+	kubernetesLister *kube.KubeLister
 }
 
 func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]WorkloadInfo, error) {
 	var workloadInfos []WorkloadInfo
 	switch workloadTypes {
 	case DeploymentResourceTypes:
-		deployments, err := ka.kubernetesClient.AppsV1().Deployments(namespace).List(v1.ListOptions{})
+		deploymentList, err := ka.kubernetesLister.DeploymentLister.Deployments(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
 
-		for _, item := range deployments.Items {
+		for _, item := range deploymentList {
 			sInfo := WorkloadInfo{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
@@ -43,12 +46,12 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case StatefulSetResourceTypes:
-		statefulSetList, err := ka.kubernetesClient.AppsV1().StatefulSets(namespace).List(v1.ListOptions{})
+		statefulSetList, err := ka.kubernetesLister.StatefulSetLister.StatefulSets(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
 
-		for _, item := range statefulSetList.Items {
+		for _, item := range statefulSetList {
 			sInfo := WorkloadInfo{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
@@ -60,12 +63,12 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case DaemonSetResourceTypes:
-		daemonSetList, err := ka.kubernetesClient.AppsV1().DaemonSets(namespace).List(v1.ListOptions{})
+		daemonSetList, err := ka.kubernetesLister.DaemonSetLister.DaemonSets(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
 
-		for _, item := range daemonSetList.Items {
+		for _, item := range daemonSetList {
 			sInfo := WorkloadInfo{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
@@ -77,12 +80,12 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case ReplicaSetResourceTypes:
-		replicaSetList, err := ka.kubernetesClient.AppsV1().ReplicaSets(namespace).List(v1.ListOptions{})
+		replicaSetList, err := ka.kubernetesLister.ReplicaSetsLister.ReplicaSets(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
 
-		for _, item := range replicaSetList.Items {
+		for _, item := range replicaSetList {
 			sInfo := WorkloadInfo{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
@@ -94,12 +97,12 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case JobResourceTypes:
-		replicaSetList, err := ka.kubernetesClient.BatchV1().Jobs(namespace).List(v1.ListOptions{})
+		jobList, err := ka.kubernetesLister.JobLister.Jobs(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
 
-		for _, item := range replicaSetList.Items {
+		for _, item := range jobList {
 			sInfo := WorkloadInfo{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
@@ -111,12 +114,12 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case CronJobResourceTypes:
-		replicaSetList, err := ka.kubernetesClient.BatchV1beta1().CronJobs(namespace).List(v1.ListOptions{})
+		cronJobList, err := ka.kubernetesLister.CronJobLister.CronJobs(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
 
-		for _, item := range replicaSetList.Items {
+		for _, item := range cronJobList {
 			sInfo := WorkloadInfo{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
@@ -130,6 +133,10 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 	default:
 		return nil, errors.New("invalid ")
 	}
+
+	sort.Slice(workloadInfos, func(i, j int) bool {
+		return workloadInfos[i].Name < workloadInfos[j].Name
+	})
 
 	return workloadInfos, nil
 }

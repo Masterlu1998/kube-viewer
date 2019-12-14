@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
+	"github.com/Masterlu1998/kube-viewer/kube"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -28,9 +29,10 @@ type DeploymentScrapper struct {
 	namespace     string
 }
 
-func NewDeploymentScrapper(client *kubernetes.Clientset, namespace string) *DeploymentScrapper {
+func NewDeploymentScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, namespace string) *DeploymentScrapper {
 	ka := &kubeAccessor{
 		kubernetesClient: client,
+		kubernetesLister: lister,
 	}
 
 	return &DeploymentScrapper{
