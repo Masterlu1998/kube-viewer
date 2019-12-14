@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 )
@@ -20,6 +19,11 @@ var (
 	}
 )
 
+const (
+	keyboardActionTypes  = "keyboard"
+	namespaceActionTypes = "namespace"
+)
+
 type eventListener struct {
 	ctx                context.Context
 	tdb                *TerminalDashBoard
@@ -32,7 +36,7 @@ type eventListener struct {
 	scrapperManagement *kScrapper.ScrapperManagement
 }
 
-type handler func(ctx context.Context, tdb *TerminalDashBoard, sm *kScrapper.ScrapperManagement, namespace string)
+type handler func()
 
 func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel context.CancelFunc, sm *kScrapper.ScrapperManagement) *eventListener {
 	return &eventListener{
@@ -48,14 +52,21 @@ func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel contex
 	}
 }
 
-func (el *eventListener) Register(path string, h handler) {
-	el.pathHandlerMap[path] = h
+func (el *eventListener) Register() {
+	el.pathHandlerMap = map[string]handler{
+		"/" + keyboardActionTypes + "/left":              el.leftKeyboardAction,
+		"/" + keyboardActionTypes + "/right":             el.rightKeyboardAction,
+		"/" + keyboardActionTypes + "/up":                el.upKeyboardAction,
+		"/" + keyboardActionTypes + "/down":              el.downKeyboardAction,
+		"/" + namespaceActionTypes + "/sync":             el.syncNamespaceAction,
+		"/" + workload.DeploymentResourceTypes + "/list": el.deploymentGraphAction,
+	}
 }
 
 func (el *eventListener) Listen() error {
-	el.executeHandler("/" + el.resourceTypesList[el.resourceTypesIndex] + "/list")
+	el.executeHandler("/" + namespaceActionTypes + "/sync")
+	el.executeHandler("/" + el.getCurrentResourceType() + "/list")
 	el.tdb.AddResourcePointer(0)
-	el.syncNamespace()
 
 	for {
 		e := <-ui.PollEvents()
@@ -66,55 +77,33 @@ func (el *eventListener) Listen() error {
 			el.cancelFunc()
 			return nil
 		case "<Left>":
-			el.tdb.MoveTabLeft()
-			if el.namespacesIndex > 0 {
-				el.namespacesIndex = el.namespacesIndex - 1
-			}
-			path := "/" + el.resourceTypesList[el.resourceTypesIndex] + "/list"
+			path := "/" + keyboardActionTypes + "/left"
 			el.executeHandler(path)
 		case "<Right>":
-			el.tdb.MoveTabRight()
-			if el.namespacesIndex < len(el.namespacesList) {
-				el.namespacesIndex = el.namespacesIndex + 1
-			}
-			path := "/" + el.resourceTypesList[el.resourceTypesIndex] + "/list"
+			path := "/" + keyboardActionTypes + "/right"
 			el.executeHandler(path)
 		case "<Up>":
-			el.tdb.RemoveResourcePointer(el.resourceTypesIndex)
-			if el.resourceTypesIndex > 0 {
-				el.resourceTypesIndex = el.resourceTypesIndex - 1
-			}
-			el.tdb.AddResourcePointer(el.resourceTypesIndex)
-			path := "/" + el.resourceTypesList[el.resourceTypesIndex] + "/list"
+			path := "/" + keyboardActionTypes + "/up"
 			el.executeHandler(path)
 		case "<Down>":
-			el.tdb.RemoveResourcePointer(el.resourceTypesIndex)
-			if el.resourceTypesIndex < len(el.resourceTypesList)-1 {
-				el.resourceTypesIndex = el.resourceTypesIndex + 1
-			}
-			el.tdb.AddResourcePointer(el.resourceTypesIndex)
-			path := "/" + el.resourceTypesList[el.resourceTypesIndex] + "/list"
+			path := "/" + keyboardActionTypes + "/down"
 			el.executeHandler(path)
 		}
-
 	}
 }
 
 func (el *eventListener) executeHandler(path string) {
 	if handler, ok := el.pathHandlerMap[path]; ok {
-		go handler(el.ctx, el.tdb, el.scrapperManagement, el.namespacesList[el.namespacesIndex])
+		go handler()
 	}
 
 	return
 }
 
-func (el *eventListener) syncNamespace() {
-	nc := el.scrapperManagement.ScrapperMap[namespace.NamespaceScrapperTypes]
-	nc.StartScrapper(el.ctx, "")
-	ns := <-nc.Watch()
-	nc.StopResourceScrapper()
-	namespaces := ns.([]string)
-	el.namespacesList = namespaces
-	el.tdb.NamespaceTab.TabNames = namespaces
-	ui.Render(el.tdb.Grid)
+func (el *eventListener) getCurrentNamespace() string {
+	return el.namespacesList[el.namespacesIndex]
+}
+
+func (el *eventListener) getCurrentResourceType() string {
+	return el.resourceTypesList[el.namespacesIndex]
 }

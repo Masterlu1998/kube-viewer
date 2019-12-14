@@ -10,23 +10,24 @@ import (
 
 const (
 	NamespaceScrapperTypes = "NamespaceScrapper"
-	NamespaceResourceTypes = "namespace"
+	NamespaceResourceTypes = "Namespace"
 )
 
 type NamespaceScrapper struct {
-	stop          chan bool
-	ch            chan dataTypes.KubernetesData
-	kubeAccessor  *kubeAccessor
-	resourceTypes string
+	stop         chan bool
+	ch           chan dataTypes.KubernetesData
+	kubeAccessor *kubeAccessor
+	namespace    string
 }
 
-func NewNamespaceScrapper(client *kubernetes.Clientset) *NamespaceScrapper {
+func NewNamespaceScrapper(client *kubernetes.Clientset, namespace string) *NamespaceScrapper {
 	ka := &kubeAccessor{
 		kubernetesClient: client,
 	}
 
 	return &NamespaceScrapper{
 		kubeAccessor: ka,
+		namespace:    namespace,
 	}
 }
 
@@ -38,8 +39,8 @@ func (w *NamespaceScrapper) Watch() <-chan dataTypes.KubernetesData {
 	return w.ch
 }
 
-func (w *NamespaceScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.StopResourceScrapper()
+func (w *NamespaceScrapper) StartScrapper(ctx context.Context) {
+	w.stopResourceScrapper()
 	w.ch = make(chan dataTypes.KubernetesData)
 	w.stop = make(chan bool)
 
@@ -69,13 +70,20 @@ func (w *NamespaceScrapper) scrapeDataIntoCh() error {
 	return nil
 }
 
-func (w *NamespaceScrapper) StopResourceScrapper() {
+func (w *NamespaceScrapper) stopResourceScrapper() {
 	if w.stop != nil {
 		w.stop <- true
+		close(w.stop)
 	}
+	w.stop = nil
 
 	if w.ch != nil {
 		close(w.ch)
 	}
 	w.ch = nil
+}
+
+// namespace don't have namespace
+func (w *NamespaceScrapper) SetNamespace(ns string) {
+	return
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 )
 
@@ -19,7 +18,7 @@ func Run(ctx context.Context, cancel context.CancelFunc, sm *kScrapper.ScrapperM
 
 	eventListener := newEventListener(ctx, tdb, cancel, sm)
 
-	eventListener.Register("/"+workload.DeploymentResourceTypes+"/list", DeploymentGraphAction)
+	eventListener.Register()
 
 	return eventListener.Listen()
 }

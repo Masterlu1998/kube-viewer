@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	pointer = "* "
+	pointer = "->"
 )
 
 var (
@@ -40,7 +40,7 @@ func InitDashBoard() *TerminalDashBoard {
 	rTable.TextAlignment = ui.AlignCenter
 
 	// init namespace tab
-	nTab := widgets.NewTabPane("default", "nginx")
+	nTab := widgets.NewTabPane()
 
 	// init workload tab
 	rTab := widgets.NewList()

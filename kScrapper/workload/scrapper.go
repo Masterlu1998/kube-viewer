@@ -25,15 +25,17 @@ type DeploymentScrapper struct {
 	ch            chan dataTypes.KubernetesData
 	kubeAccessor  *kubeAccessor
 	resourceTypes string
+	namespace     string
 }
 
-func NewDeploymentScrapper(client *kubernetes.Clientset) *DeploymentScrapper {
+func NewDeploymentScrapper(client *kubernetes.Clientset, namespace string) *DeploymentScrapper {
 	ka := &kubeAccessor{
 		kubernetesClient: client,
 	}
 
 	return &DeploymentScrapper{
 		kubeAccessor: ka,
+		namespace:    namespace,
 	}
 }
 
@@ -45,8 +47,8 @@ func (w *DeploymentScrapper) Watch() <-chan dataTypes.KubernetesData {
 	return w.ch
 }
 
-func (w *DeploymentScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.StopResourceScrapper()
+func (w *DeploymentScrapper) StartScrapper(ctx context.Context) {
+	w.stopResourceScrapper()
 	w.ch = make(chan dataTypes.KubernetesData)
 	w.stop = make(chan bool)
 
@@ -60,7 +62,7 @@ func (w *DeploymentScrapper) StartScrapper(ctx context.Context, namespace string
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				_ = w.scrapeDataIntoCh(namespace)
+				_ = w.scrapeDataIntoCh(w.namespace)
 			}
 		}
 	}(ctx, w.stop)
@@ -76,7 +78,7 @@ func (w *DeploymentScrapper) scrapeDataIntoCh(namespace string) error {
 	return nil
 }
 
-func (w *DeploymentScrapper) StopResourceScrapper() {
+func (w *DeploymentScrapper) stopResourceScrapper() {
 	if w.stop != nil {
 		w.stop <- true
 	}
@@ -85,4 +87,8 @@ func (w *DeploymentScrapper) StopResourceScrapper() {
 		close(w.ch)
 	}
 	w.ch = nil
+}
+
+func (w *DeploymentScrapper) SetNamespace(namespace string) {
+	w.namespace = namespace
 }
