@@ -111,17 +111,10 @@ func (el *eventListener) executeHandler(path string) {
 func (el *eventListener) syncNamespace() {
 	nc := el.scrapperManagement.ScrapperMap[namespace.NamespaceScrapperTypes]
 	nc.StartScrapper(el.ctx, "")
-	go func() {
-		for {
-			select {
-			case ns := <-nc.Watch():
-				namespaces := ns.([]string)
-				el.namespacesList = namespaces
-				el.tdb.NamespaceTab.TabNames = namespaces
-				ui.Render(el.tdb.Grid)
-			case <-el.ctx.Done():
-				return
-			}
-		}
-	}()
+	ns := <-nc.Watch()
+	nc.StopResourceScrapper()
+	namespaces := ns.([]string)
+	el.namespacesList = namespaces
+	el.tdb.NamespaceTab.TabNames = namespaces
+	ui.Render(el.tdb.Grid)
 }

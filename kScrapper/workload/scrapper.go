@@ -46,7 +46,7 @@ func (w *DeploymentScrapper) Watch() <-chan dataTypes.KubernetesData {
 }
 
 func (w *DeploymentScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.stopResourceScrapper()
+	w.StopResourceScrapper()
 	w.ch = make(chan dataTypes.KubernetesData)
 	w.stop = make(chan bool)
 
@@ -76,7 +76,7 @@ func (w *DeploymentScrapper) scrapeDataIntoCh(namespace string) error {
 	return nil
 }
 
-func (w *DeploymentScrapper) stopResourceScrapper() {
+func (w *DeploymentScrapper) StopResourceScrapper() {
 	if w.stop != nil {
 		w.stop <- true
 	}

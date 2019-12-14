@@ -13,4 +13,5 @@ type Scrapper interface {
 	GetScrapperTypes() string
 	Watch() <-chan KubernetesData
 	StartScrapper(ctx context.Context, namespace string)
+	StopResourceScrapper()
 }

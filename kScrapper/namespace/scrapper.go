@@ -39,7 +39,7 @@ func (w *NamespaceScrapper) Watch() <-chan dataTypes.KubernetesData {
 }
 
 func (w *NamespaceScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.stopResourceScrapper()
+	w.StopResourceScrapper()
 	w.ch = make(chan dataTypes.KubernetesData)
 	w.stop = make(chan bool)
 
@@ -69,7 +69,7 @@ func (w *NamespaceScrapper) scrapeDataIntoCh() error {
 	return nil
 }
 
-func (w *NamespaceScrapper) stopResourceScrapper() {
+func (w *NamespaceScrapper) StopResourceScrapper() {
 	if w.stop != nil {
 		w.stop <- true
 	}
