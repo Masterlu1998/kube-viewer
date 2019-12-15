@@ -22,6 +22,7 @@ var (
 const (
 	keyboardActionTypes  = "keyboard"
 	namespaceActionTypes = "namespace"
+	workloadActionTypes  = "workload"
 )
 
 type eventListener struct {
@@ -54,18 +55,19 @@ func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel contex
 
 func (el *eventListener) Register() {
 	el.pathHandlerMap = map[string]handler{
-		"/" + keyboardActionTypes + "/left":              el.leftKeyboardAction,
-		"/" + keyboardActionTypes + "/right":             el.rightKeyboardAction,
-		"/" + keyboardActionTypes + "/up":                el.upKeyboardAction,
-		"/" + keyboardActionTypes + "/down":              el.downKeyboardAction,
-		"/" + namespaceActionTypes + "/sync":             el.syncNamespaceAction,
-		"/" + workload.DeploymentResourceTypes + "/list": el.deploymentGraphAction,
+		"/" + keyboardActionTypes + "/left":  el.leftKeyboardAction,
+		"/" + keyboardActionTypes + "/right": el.rightKeyboardAction,
+		"/" + keyboardActionTypes + "/up":    el.upKeyboardAction,
+		"/" + keyboardActionTypes + "/down":  el.downKeyboardAction,
+
+		"/" + namespaceActionTypes + "/sync": el.syncNamespaceAction,
+		"/" + workloadActionTypes + "/list":  el.workloadGraphAction,
 	}
 }
 
 func (el *eventListener) Listen() error {
 	el.executeHandler("/" + namespaceActionTypes + "/sync")
-	el.executeHandler("/" + el.getCurrentResourceType() + "/list")
+	el.executeHandler("/" + workloadActionTypes + "/list")
 	el.tdb.AddResourcePointer(0)
 
 	for {
@@ -105,5 +107,9 @@ func (el *eventListener) getCurrentNamespace() string {
 }
 
 func (el *eventListener) getCurrentResourceType() string {
-	return el.resourceTypesList[el.namespacesIndex]
+	return el.resourceTypesList[el.resourceTypesIndex]
+}
+
+func (el *eventListener) getCurrentScrapperType() string {
+	return el.resourceTypesList[el.resourceTypesIndex] + "Scrapper"
 }

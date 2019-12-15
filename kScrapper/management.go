@@ -2,6 +2,7 @@ package kScrapper
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
@@ -13,8 +14,9 @@ import (
 type Scrapper interface {
 	GetScrapperTypes() string
 	Watch() <-chan common.KubernetesData
-	StartScrapper(ctx context.Context)
+	StartScrapper(ctx context.Context, namespace string)
 	SetNamespace(namespace string)
+	StopScrapper()
 }
 
 func NewScrapperManagement(ctx context.Context) (*ScrapperManagement, error) {
@@ -26,8 +28,13 @@ func NewScrapperManagement(ctx context.Context) (*ScrapperManagement, error) {
 	kubeLister := kube.NewKubeLister(ctx, kubeClient)
 
 	sMap := map[string]Scrapper{
-		workload.DeploymentScrapperTypes: workload.NewDeploymentScrapper(kubeLister, kubeClient),
-		namespace.NamespaceScrapperTypes: namespace.NewNamespaceScrapper(kubeLister, kubeClient),
+		workload.DeploymentScrapperTypes:  workload.NewDeploymentScrapper(kubeLister, kubeClient),
+		workload.StatefulSetScrapperTypes: workload.NewStatefulSetScrapper(kubeLister, kubeClient),
+		workload.DaemonSetScrapperTypes:   workload.NewDaemonSetScrapper(kubeLister, kubeClient),
+		workload.ReplicaSetScrapperTypes:  workload.NewReplicaSetScrapper(kubeLister, kubeClient),
+		workload.CronJobScrapperTypes:     workload.NewCronJobScrapper(kubeLister, kubeClient),
+		workload.JobScrapperTypes:         workload.NewJobScrapper(kubeLister, kubeClient),
+		namespace.NamespaceScrapperTypes:  namespace.NewNamespaceScrapper(kubeLister, kubeClient),
 	}
 
 	return &ScrapperManagement{
@@ -44,11 +51,27 @@ type ScrapperManagement struct {
 	namespace         string
 }
 
-func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrapperType string) {
+func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrapperType, namespace string) error {
 	sm.rwMutex.Lock()
 	defer sm.rwMutex.Unlock()
-	sm.scrapperMap[scrapperType].StartScrapper(ctx)
-	sm.activeScrapperMap[scrapperType] = true
+	if s, ok := sm.scrapperMap[scrapperType]; ok {
+		s.StartScrapper(ctx, namespace)
+		sm.activeScrapperMap[scrapperType] = true
+		return nil
+	}
+
+	return errors.New("no this scrapper type")
+}
+
+func (sm *ScrapperManagement) StopSpecificScrapper(scrapperType string) {
+	if !sm.activeScrapperMap[scrapperType] {
+		return
+	}
+
+	sm.rwMutex.Lock()
+	defer sm.rwMutex.Unlock()
+	sm.scrapperMap[scrapperType].StopScrapper()
+	delete(sm.activeScrapperMap, scrapperType)
 }
 
 func (sm *ScrapperManagement) GetSpecificScrapperCh(scrapperType string) <-chan common.KubernetesData {

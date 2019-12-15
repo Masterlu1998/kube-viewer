@@ -34,8 +34,8 @@ func (w *NamespaceScrapper) GetScrapperTypes() string {
 	return NamespaceScrapperTypes
 }
 
-func (w *NamespaceScrapper) StartScrapper(ctx context.Context) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh)
+func (w *NamespaceScrapper) StartScrapper(ctx context.Context, namespace string) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, "")
 
 }
 

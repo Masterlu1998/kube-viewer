@@ -8,10 +8,14 @@ import (
 
 var resourceTableHeader = [][]string{{"name", "namespace", "pods", "create time", "images"}}
 
-func (el *eventListener) deploymentGraphAction() {
-	el.scrapperManagement.StartSpecificScrapper(el.ctx, workload.DeploymentScrapperTypes)
+func (el *eventListener) workloadGraphAction() {
+	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, el.getCurrentScrapperType(), el.getCurrentNamespace())
+	if err != nil {
+		return
+	}
+
 	t := el.tdb.ResourceTable
-	for d := range el.scrapperManagement.GetSpecificScrapperCh(workload.DeploymentScrapperTypes) {
+	for d := range el.scrapperManagement.GetSpecificScrapperCh(el.getCurrentScrapperType()) {
 		workloadSData, ok := d.([]workload.WorkloadInfo)
 		if !ok {
 			continue
@@ -33,7 +37,11 @@ func (el *eventListener) deploymentGraphAction() {
 }
 
 func (el *eventListener) syncNamespaceAction() {
-	el.scrapperManagement.StartSpecificScrapper(el.ctx, namespace.NamespaceScrapperTypes)
+	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, namespace.NamespaceScrapperTypes, "")
+	if err != nil {
+		return
+	}
+
 	go func() {
 		for {
 			select {
@@ -71,10 +79,11 @@ func (el *eventListener) rightKeyboardAction() {
 func (el *eventListener) upKeyboardAction() {
 	el.tdb.RemoveResourcePointer(el.resourceTypesIndex)
 	if el.resourceTypesIndex > 0 {
+		el.scrapperManagement.StopSpecificScrapper(el.getCurrentScrapperType())
 		el.resourceTypesIndex = el.resourceTypesIndex - 1
 	}
 	el.tdb.AddResourcePointer(el.resourceTypesIndex)
-	path := "/" + el.getCurrentResourceType() + "/list"
+	path := "/" + workloadActionTypes + "/list"
 	el.executeHandler(path)
 	ui.Render(el.tdb.Grid)
 }
@@ -82,10 +91,11 @@ func (el *eventListener) upKeyboardAction() {
 func (el *eventListener) downKeyboardAction() {
 	el.tdb.RemoveResourcePointer(el.resourceTypesIndex)
 	if el.resourceTypesIndex < len(el.resourceTypesList)-1 {
+		el.scrapperManagement.StopSpecificScrapper(el.getCurrentScrapperType())
 		el.resourceTypesIndex = el.resourceTypesIndex + 1
 	}
 	el.tdb.AddResourcePointer(el.resourceTypesIndex)
-	path := "/" + el.getCurrentResourceType() + "/list"
+	path := "/" + workloadActionTypes + "/list"
 	el.executeHandler(path)
 	ui.Render(el.tdb.Grid)
 }

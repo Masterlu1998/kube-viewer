@@ -25,6 +25,13 @@ type kubeAccessor struct {
 	kubernetesLister *kube.KubeLister
 }
 
+func generateKubeAccessor(lister *kube.KubeLister, client *kubernetes.Clientset) *kubeAccessor {
+	return &kubeAccessor{
+		kubernetesClient: client,
+		kubernetesLister: lister,
+	}
+}
+
 func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]WorkloadInfo, error) {
 	var workloadInfos []WorkloadInfo
 	switch workloadTypes {

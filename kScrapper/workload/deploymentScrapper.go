@@ -12,13 +12,6 @@ const (
 	DeploymentScrapperTypes = "DeploymentScrapper"
 	DeploymentResourceTypes = "Deployment"
 )
-const (
-	StatefulSetResourceTypes = "StatefulSet"
-	DaemonSetResourceTypes   = "DaemonSet"
-	ReplicaSetResourceTypes  = "ReplicaSet"
-	CronJobResourceTypes     = "CronJob"
-	JobResourceTypes         = "Job"
-)
 
 type DeploymentScrapper struct {
 	*common.CommonScrapper
@@ -26,23 +19,18 @@ type DeploymentScrapper struct {
 }
 
 func NewDeploymentScrapper(lister *kube.KubeLister, client *kubernetes.Clientset) *DeploymentScrapper {
-	ka := &kubeAccessor{
-		kubernetesClient: client,
-		kubernetesLister: lister,
-	}
-
 	return &DeploymentScrapper{
-		kubeAccessor:   ka,
+		kubeAccessor:   generateKubeAccessor(lister, client),
 		CommonScrapper: common.NewCommonScrapper(),
 	}
 }
 
 func (w *DeploymentScrapper) GetScrapperTypes() string {
-	return DeploymentResourceTypes
+	return DeploymentScrapperTypes
 }
 
-func (w *DeploymentScrapper) StartScrapper(ctx context.Context) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh)
+func (w *DeploymentScrapper) StartScrapper(ctx context.Context, namespace string) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
 }
 
 func (w *DeploymentScrapper) scrapeDataIntoCh(namespace string) (common.KubernetesData, error) {
