@@ -5,6 +5,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
@@ -19,7 +20,7 @@ type Scrapper interface {
 	StopScrapper()
 }
 
-func NewScrapperManagement(ctx context.Context) (*ScrapperManagement, error) {
+func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector) (*ScrapperManagement, error) {
 	kubeClient, err := kube.GetKubernetesClient()
 	if err != nil {
 		return nil, err
@@ -28,13 +29,13 @@ func NewScrapperManagement(ctx context.Context) (*ScrapperManagement, error) {
 	kubeLister := kube.NewKubeLister(ctx, kubeClient)
 
 	sMap := map[string]Scrapper{
-		workload.DeploymentScrapperTypes:  workload.NewDeploymentScrapper(kubeLister, kubeClient),
-		workload.StatefulSetScrapperTypes: workload.NewStatefulSetScrapper(kubeLister, kubeClient),
-		workload.DaemonSetScrapperTypes:   workload.NewDaemonSetScrapper(kubeLister, kubeClient),
-		workload.ReplicaSetScrapperTypes:  workload.NewReplicaSetScrapper(kubeLister, kubeClient),
-		workload.CronJobScrapperTypes:     workload.NewCronJobScrapper(kubeLister, kubeClient),
-		workload.JobScrapperTypes:         workload.NewJobScrapper(kubeLister, kubeClient),
-		namespace.NamespaceScrapperTypes:  namespace.NewNamespaceScrapper(kubeLister, kubeClient),
+		workload.DeploymentScrapperTypes:  workload.NewDeploymentScrapper(kubeLister, kubeClient, collector),
+		workload.StatefulSetScrapperTypes: workload.NewStatefulSetScrapper(kubeLister, kubeClient, collector),
+		workload.DaemonSetScrapperTypes:   workload.NewDaemonSetScrapper(kubeLister, kubeClient, collector),
+		workload.ReplicaSetScrapperTypes:  workload.NewReplicaSetScrapper(kubeLister, kubeClient, collector),
+		workload.CronJobScrapperTypes:     workload.NewCronJobScrapper(kubeLister, kubeClient, collector),
+		workload.JobScrapperTypes:         workload.NewJobScrapper(kubeLister, kubeClient, collector),
+		namespace.NamespaceScrapperTypes:  namespace.NewNamespaceScrapper(kubeLister, kubeClient, collector),
 	}
 
 	return &ScrapperManagement{

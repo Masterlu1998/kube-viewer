@@ -3,6 +3,7 @@ package workload
 import (
 	"context"
 
+	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kube"
 	"k8s.io/client-go/kubernetes"
@@ -18,10 +19,10 @@ type DeploymentScrapper struct {
 	kubeAccessor *kubeAccessor
 }
 
-func NewDeploymentScrapper(lister *kube.KubeLister, client *kubernetes.Clientset) *DeploymentScrapper {
+func NewDeploymentScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *DeploymentScrapper {
 	return &DeploymentScrapper{
 		kubeAccessor:   generateKubeAccessor(lister, client),
-		CommonScrapper: common.NewCommonScrapper(),
+		CommonScrapper: common.NewCommonScrapper(dc),
 	}
 }
 

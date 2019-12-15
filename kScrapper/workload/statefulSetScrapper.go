@@ -3,6 +3,7 @@ package workload
 import (
 	"context"
 
+	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kube"
 	"k8s.io/client-go/kubernetes"
@@ -18,10 +19,10 @@ type StatefulSetScrapper struct {
 	kubeAccessor *kubeAccessor
 }
 
-func NewStatefulSetScrapper(lister *kube.KubeLister, client *kubernetes.Clientset) *StatefulSetScrapper {
+func NewStatefulSetScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *StatefulSetScrapper {
 	return &StatefulSetScrapper{
 		kubeAccessor:   generateKubeAccessor(lister, client),
-		CommonScrapper: common.NewCommonScrapper(),
+		CommonScrapper: common.NewCommonScrapper(dc),
 	}
 }
 

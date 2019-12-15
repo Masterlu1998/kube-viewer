@@ -1,6 +1,7 @@
 package terminal
 
 import (
+	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
@@ -9,8 +10,11 @@ import (
 var resourceTableHeader = [][]string{{"name", "namespace", "pods", "create time", "images"}}
 
 func (el *eventListener) workloadGraphAction() {
+	el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, "start scrapper", el.getCurrentScrapperType()))
+
 	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, el.getCurrentScrapperType(), el.getCurrentNamespace())
 	if err != nil {
+		el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), "workloadAction"))
 		return
 	}
 
@@ -18,7 +22,14 @@ func (el *eventListener) workloadGraphAction() {
 	for d := range el.scrapperManagement.GetSpecificScrapperCh(el.getCurrentScrapperType()) {
 		workloadSData, ok := d.([]workload.WorkloadInfo)
 		if !ok {
+			el.debugCollector.Collect(debug.NewDebugMessage(debug.Error,
+				"convert to type []workload.WorkloadInfo failed", "workloadAction"))
 			continue
+		}
+
+		if len(workloadSData) == 0 {
+			el.debugCollector.Collect(debug.NewDebugMessage(debug.Warn,
+				"workload list is empty", "workloadAction"))
 		}
 
 		t.Rows = resourceTableHeader
@@ -39,23 +50,29 @@ func (el *eventListener) workloadGraphAction() {
 func (el *eventListener) syncNamespaceAction() {
 	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, namespace.NamespaceScrapperTypes, "")
 	if err != nil {
+		el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), "namespaceAction"))
 		return
 	}
 
-	go func() {
-		for {
-			select {
-			case <-el.ctx.Done():
-				return
-			case ns := <-el.scrapperManagement.GetSpecificScrapperCh(namespace.NamespaceScrapperTypes):
-				namespaces := []string{""}
-				namespaces = append(namespaces, ns.([]string)...)
-				el.namespacesList = namespaces
-				el.tdb.NamespaceTab.TabNames = namespaces
-			}
-			ui.Render(el.tdb.Grid)
+	for {
+		select {
+		case <-el.ctx.Done():
+			return
+		case ns := <-el.scrapperManagement.GetSpecificScrapperCh(namespace.NamespaceScrapperTypes):
+			namespaces := []string{""}
+			namespaces = append(namespaces, ns.([]string)...)
+			el.namespacesList = namespaces
+			el.tdb.NamespaceTab.TabNames = namespaces
 		}
-	}()
+		ui.Render(el.tdb.Grid)
+	}
+}
+
+func (el *eventListener) collectDebugMessage() {
+	for m := range el.debugCollector.GetDebugMessageCh() {
+		el.tdb.ShowDebugInfo(m)
+		ui.Render(el.tdb.Grid)
+	}
 }
 
 func (el *eventListener) leftKeyboardAction() {

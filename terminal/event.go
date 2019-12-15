@@ -3,6 +3,7 @@ package terminal
 import (
 	"context"
 
+	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
@@ -20,9 +21,10 @@ var (
 )
 
 const (
-	keyboardActionTypes  = "keyboard"
-	namespaceActionTypes = "namespace"
-	workloadActionTypes  = "workload"
+	keyboardActionTypes     = "keyboard"
+	namespaceActionTypes    = "namespace"
+	workloadActionTypes     = "workload"
+	debugMessageActionTypes = "debug"
 )
 
 type eventListener struct {
@@ -35,11 +37,14 @@ type eventListener struct {
 	resourceTypesIndex int
 	namespacesIndex    int
 	scrapperManagement *kScrapper.ScrapperManagement
+	debugCollector     *debug.DebugCollector
 }
 
 type handler func()
 
-func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel context.CancelFunc, sm *kScrapper.ScrapperManagement) *eventListener {
+func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel context.CancelFunc,
+	sm *kScrapper.ScrapperManagement,
+	dc *debug.DebugCollector) *eventListener {
 	return &eventListener{
 		ctx:                ctx,
 		tdb:                tdb,
@@ -50,6 +55,7 @@ func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel contex
 		pathHandlerMap:     make(map[string]handler),
 		resourceTypesIndex: 0,
 		namespacesIndex:    0,
+		debugCollector:     dc,
 	}
 }
 
@@ -60,12 +66,14 @@ func (el *eventListener) Register() {
 		"/" + keyboardActionTypes + "/up":    el.upKeyboardAction,
 		"/" + keyboardActionTypes + "/down":  el.downKeyboardAction,
 
-		"/" + namespaceActionTypes + "/sync": el.syncNamespaceAction,
-		"/" + workloadActionTypes + "/list":  el.workloadGraphAction,
+		"/" + namespaceActionTypes + "/sync":       el.syncNamespaceAction,
+		"/" + workloadActionTypes + "/list":        el.workloadGraphAction,
+		"/" + debugMessageActionTypes + "/collect": el.collectDebugMessage,
 	}
 }
 
 func (el *eventListener) Listen() error {
+	el.executeHandler("/" + debugMessageActionTypes + "/collect")
 	el.executeHandler("/" + namespaceActionTypes + "/sync")
 	el.executeHandler("/" + workloadActionTypes + "/list")
 	el.tdb.AddResourcePointer(0)

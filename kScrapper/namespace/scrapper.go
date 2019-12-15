@@ -3,6 +3,7 @@ package namespace
 import (
 	"context"
 
+	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kube"
 	"k8s.io/client-go/kubernetes"
@@ -18,7 +19,7 @@ type NamespaceScrapper struct {
 	kubeAccessor *kubeAccessor
 }
 
-func NewNamespaceScrapper(lister *kube.KubeLister, client *kubernetes.Clientset) *NamespaceScrapper {
+func NewNamespaceScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *NamespaceScrapper {
 	ka := &kubeAccessor{
 		kubernetesClient: client,
 		kubernetesLister: lister,
@@ -26,7 +27,7 @@ func NewNamespaceScrapper(lister *kube.KubeLister, client *kubernetes.Clientset)
 
 	return &NamespaceScrapper{
 		kubeAccessor:   ka,
-		CommonScrapper: common.NewCommonScrapper(),
+		CommonScrapper: common.NewCommonScrapper(dc),
 	}
 }
 

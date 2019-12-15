@@ -2,21 +2,28 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"time"
+
+	"github.com/Masterlu1998/kube-viewer/debug"
 )
+
+const commonScrapperTypes = "commonScrapper"
 
 type DataSourceFunc func(string) (KubernetesData, error)
 
-func NewCommonScrapper() *CommonScrapper {
+func NewCommonScrapper(dc *debug.DebugCollector) *CommonScrapper {
 	return &CommonScrapper{
-		namespace: "",
+		namespace:      "",
+		debugCollector: dc,
 	}
 }
 
 type CommonScrapper struct {
-	stop      chan bool
-	ch        chan KubernetesData
-	namespace string
+	stop           chan bool
+	ch             chan KubernetesData
+	namespace      string
+	debugCollector *debug.DebugCollector
 }
 
 func (c *CommonScrapper) Watch() <-chan KubernetesData {
@@ -24,6 +31,8 @@ func (c *CommonScrapper) Watch() <-chan KubernetesData {
 }
 
 func (c *CommonScrapper) SetNamespace(ns string) {
+	c.debugCollector.Collect(debug.NewDebugMessage(debug.Info,
+		fmt.Sprintf("set namespace to %s", ns), "commonScrapper"))
 	c.namespace = ns
 }
 
@@ -43,6 +52,7 @@ func (c *CommonScrapper) ScrapeDataIntoChWithSource(ctx context.Context, f DataS
 			case <-ticker.C:
 				data, err := f(c.namespace)
 				if err != nil {
+					c.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), commonScrapperTypes))
 					continue
 				}
 				c.ch <- data
