@@ -26,8 +26,8 @@ func NewScrapperManagement(ctx context.Context) (*ScrapperManagement, error) {
 	kubeLister := kube.NewKubeLister(ctx, kubeClient)
 
 	sMap := map[string]Scrapper{
-		workload.ResourceScrapperTypes:   workload.NewDeploymentScrapper(kubeLister, kubeClient, ""),
-		namespace.NamespaceScrapperTypes: namespace.NewNamespaceScrapper(kubeLister, kubeClient, ""),
+		workload.DeploymentScrapperTypes: workload.NewDeploymentScrapper(kubeLister, kubeClient),
+		namespace.NamespaceScrapperTypes: namespace.NewNamespaceScrapper(kubeLister, kubeClient),
 	}
 
 	return &ScrapperManagement{

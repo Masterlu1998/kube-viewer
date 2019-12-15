@@ -2,7 +2,6 @@ package workload
 
 import (
 	"context"
-	"time"
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kube"
@@ -10,8 +9,8 @@ import (
 )
 
 const (
-	ResourceScrapperTypes          = "DeploymentScrapper"
-	DeploymentResourceTypes string = "Deployment"
+	DeploymentScrapperTypes = "DeploymentScrapper"
+	DeploymentResourceTypes = "Deployment"
 )
 const (
 	StatefulSetResourceTypes = "StatefulSet"
@@ -22,75 +21,35 @@ const (
 )
 
 type DeploymentScrapper struct {
-	stop          chan bool
-	ch            chan common.KubernetesData
-	kubeAccessor  *kubeAccessor
-	resourceTypes string
-	namespace     string
+	*common.CommonScrapper
+	kubeAccessor *kubeAccessor
 }
 
-func NewDeploymentScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, namespace string) *DeploymentScrapper {
+func NewDeploymentScrapper(lister *kube.KubeLister, client *kubernetes.Clientset) *DeploymentScrapper {
 	ka := &kubeAccessor{
 		kubernetesClient: client,
 		kubernetesLister: lister,
 	}
 
 	return &DeploymentScrapper{
-		kubeAccessor: ka,
-		namespace:    namespace,
+		kubeAccessor:   ka,
+		CommonScrapper: common.NewCommonScrapper(),
 	}
 }
 
 func (w *DeploymentScrapper) GetScrapperTypes() string {
-	return ResourceScrapperTypes
-}
-
-func (w *DeploymentScrapper) Watch() <-chan common.KubernetesData {
-	return w.ch
+	return DeploymentResourceTypes
 }
 
 func (w *DeploymentScrapper) StartScrapper(ctx context.Context) {
-	w.stopResourceScrapper()
-	w.ch = make(chan common.KubernetesData)
-	w.stop = make(chan bool)
-
-	go func(ctx context.Context, stop chan bool) {
-		ticker := time.NewTicker(common.ScrapInterval)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-stop:
-				return
-			case <-ctx.Done():
-				return
-			case <-ticker.C:
-				_ = w.scrapeDataIntoCh(w.namespace)
-			}
-		}
-	}(ctx, w.stop)
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh)
 }
 
-func (w *DeploymentScrapper) scrapeDataIntoCh(namespace string) error {
+func (w *DeploymentScrapper) scrapeDataIntoCh(namespace string) (common.KubernetesData, error) {
 	deployments, err := w.kubeAccessor.getWorkloads(DeploymentResourceTypes, namespace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	w.ch <- deployments
-	return nil
-}
-
-func (w *DeploymentScrapper) stopResourceScrapper() {
-	if w.stop != nil {
-		w.stop <- true
-	}
-
-	if w.ch != nil {
-		close(w.ch)
-	}
-	w.ch = nil
-}
-
-func (w *DeploymentScrapper) SetNamespace(namespace string) {
-	w.namespace = namespace
+	return deployments, nil
 }

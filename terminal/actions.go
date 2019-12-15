@@ -9,9 +9,9 @@ import (
 var resourceTableHeader = [][]string{{"name", "namespace", "pods", "create time", "images"}}
 
 func (el *eventListener) deploymentGraphAction() {
-	el.scrapperManagement.StartSpecificScrapper(el.ctx, workload.ResourceScrapperTypes)
+	el.scrapperManagement.StartSpecificScrapper(el.ctx, workload.DeploymentScrapperTypes)
 	t := el.tdb.ResourceTable
-	for d := range el.scrapperManagement.GetSpecificScrapperCh(workload.ResourceScrapperTypes) {
+	for d := range el.scrapperManagement.GetSpecificScrapperCh(workload.DeploymentScrapperTypes) {
 		workloadSData, ok := d.([]workload.WorkloadInfo)
 		if !ok {
 			continue
