@@ -76,7 +76,6 @@ func (el *eventListener) Listen() error {
 	el.executeHandler("/" + debugMessageActionTypes + "/collect")
 	el.executeHandler("/" + namespaceActionTypes + "/sync")
 	el.executeHandler("/" + workloadActionTypes + "/list")
-	el.tdb.AddResourcePointer(0)
 
 	for {
 		e := <-ui.PollEvents()

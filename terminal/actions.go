@@ -94,24 +94,22 @@ func (el *eventListener) rightKeyboardAction() {
 }
 
 func (el *eventListener) upKeyboardAction() {
-	el.tdb.RemoveResourcePointer(el.resourceTypesIndex)
 	if el.resourceTypesIndex > 0 {
 		el.scrapperManagement.StopSpecificScrapper(el.getCurrentScrapperType())
 		el.resourceTypesIndex = el.resourceTypesIndex - 1
 	}
-	el.tdb.AddResourcePointer(el.resourceTypesIndex)
+	el.tdb.SelectUp(el.resourceTypesIndex)
 	path := "/" + workloadActionTypes + "/list"
 	el.executeHandler(path)
 	ui.Render(el.tdb.Grid)
 }
 
 func (el *eventListener) downKeyboardAction() {
-	el.tdb.RemoveResourcePointer(el.resourceTypesIndex)
 	if el.resourceTypesIndex < len(el.resourceTypesList)-1 {
 		el.scrapperManagement.StopSpecificScrapper(el.getCurrentScrapperType())
 		el.resourceTypesIndex = el.resourceTypesIndex + 1
 	}
-	el.tdb.AddResourcePointer(el.resourceTypesIndex)
+	el.tdb.SelectDown(el.resourceTypesIndex)
 	path := "/" + workloadActionTypes + "/list"
 	el.executeHandler(path)
 	ui.Render(el.tdb.Grid)

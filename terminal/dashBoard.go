@@ -28,7 +28,7 @@ type TerminalDashBoard struct {
 	NamespaceTab  *widgets.TabPane
 	YamlPanel     *widgets.Paragraph
 	LogPanel      *widgets.Paragraph
-	ResourceTab   *widgets.List
+	ResourceList  *widgets.List
 	Console       *widgets.List
 }
 
@@ -45,9 +45,10 @@ func InitDashBoard() *TerminalDashBoard {
 	nTab := widgets.NewTabPane()
 
 	// init workload tab
-	rTab := widgets.NewList()
-	rTab.Rows = make([]string, len(resourceTypes))
-	copy(rTab.Rows, resourceTypes)
+	rList := widgets.NewList()
+	rList.SelectedRowStyle = ui.NewStyle(ui.ColorYellow)
+	rList.Rows = make([]string, len(resourceTypes))
+	copy(rList.Rows, resourceTypes)
 
 	// yaml panel
 	yPanel := widgets.NewParagraph()
@@ -68,7 +69,7 @@ func InitDashBoard() *TerminalDashBoard {
 	grid.Set(
 		ui.NewRow(1.0/12, nTab),
 		ui.NewRow(11.0/12,
-			ui.NewCol(1.0/10, ui.NewRow(1, rTab)),
+			ui.NewCol(1.0/10, ui.NewRow(1, rList)),
 			ui.NewCol(9.0/10,
 				ui.NewRow(2.0/3, rTable),
 				ui.NewRow(1.0/3, console),
@@ -83,7 +84,7 @@ func InitDashBoard() *TerminalDashBoard {
 	return &TerminalDashBoard{
 		Grid:          grid,
 		ResourceTable: rTable,
-		ResourceTab:   rTab,
+		ResourceList:  rList,
 		NamespaceTab:  nTab,
 		YamlPanel:     yPanel,
 		Console:       console,
@@ -91,12 +92,14 @@ func InitDashBoard() *TerminalDashBoard {
 	}
 }
 
-func (t *TerminalDashBoard) RemoveResourcePointer(index int) {
-	t.ResourceTab.Rows[index] = resourceTypes[index]
+// TODO: these functions are too ugly, we will build structure for every component, each component has own function
+
+func (t *TerminalDashBoard) SelectUp(index int) {
+	t.ResourceList.ScrollUp()
 }
 
-func (t *TerminalDashBoard) AddResourcePointer(index int) {
-	t.ResourceTab.Rows[index] = pointer + resourceTypes[index]
+func (t *TerminalDashBoard) SelectDown(index int) {
+	t.ResourceList.ScrollDown()
 }
 
 func (t *TerminalDashBoard) Resize() {
