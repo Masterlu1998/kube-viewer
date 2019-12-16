@@ -7,10 +7,6 @@ import (
 	"github.com/gizak/termui/v3/widgets"
 )
 
-const (
-	pointer = "-> "
-)
-
 var (
 	resourceTypes = []string{
 		workload.DeploymentResourceTypes,
@@ -61,7 +57,7 @@ func InitDashBoard() *TerminalDashBoard {
 	// debug console
 	console := widgets.NewList()
 	console.Title = "Debug Console"
-	console.Rows = make([]string, 0)
+	console.Rows = []string{"This is kube-viewer console, every debug message will show here."}
 
 	grid := ui.NewGrid()
 	termWidth, termHeight := ui.TerminalDimensions()
@@ -118,7 +114,8 @@ func (t *TerminalDashBoard) MoveTabRight() {
 
 func (t *TerminalDashBoard) ShowDebugInfo(message debug.Message) {
 	t.Console.Rows = append(t.Console.Rows, message.Format())
-	if len(t.Console.Rows) >= 6 {
+	if len(t.Console.Rows) >= 10 {
 		t.Console.Rows = t.Console.Rows[1:]
 	}
+	t.Console.ScrollDown()
 }
