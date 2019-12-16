@@ -65,10 +65,16 @@ func (el *eventListener) Register() {
 		"/" + keyboardActionTypes + "/right": el.rightKeyboardAction,
 		"/" + keyboardActionTypes + "/up":    el.upKeyboardAction,
 		"/" + keyboardActionTypes + "/down":  el.downKeyboardAction,
+		"/" + keyboardActionTypes + "/enter": el.enterKeyboardAction,
 
-		"/" + namespaceActionTypes + "/sync":       el.syncNamespaceAction,
-		"/" + workloadActionTypes + "/list":        el.workloadGraphAction,
-		"/" + debugMessageActionTypes + "/collect": el.collectDebugMessage,
+		"/" + namespaceActionTypes + "/sync":              el.syncNamespaceAction,
+		"/" + workload.DeploymentResourceTypes + "/list":  el.deploymentGraphAction,
+		"/" + workload.StatefulSetResourceTypes + "/list": el.statefulSetGraphAction,
+		"/" + workload.DaemonSetResourceTypes + "/list":   el.daemonSetGraphAction,
+		"/" + workload.ReplicaSetResourceTypes + "/list":  el.replicaSetGraphAction,
+		"/" + workload.CronJobResourceTypes + "/list":     el.cronJobGraphAction,
+		"/" + workload.JobResourceTypes + "/list":         el.jobGraphAction,
+		"/" + debugMessageActionTypes + "/collect":        el.collectDebugMessage,
 	}
 }
 
@@ -85,6 +91,9 @@ func (el *eventListener) Listen() error {
 		case "q":
 			el.cancelFunc()
 			return nil
+		case "<Enter>":
+			path := "/" + keyboardActionTypes + "/enter"
+			el.executeHandler(path)
 		case "<Left>":
 			path := "/" + keyboardActionTypes + "/left"
 			el.executeHandler(path)

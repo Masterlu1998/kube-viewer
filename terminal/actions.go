@@ -9,17 +9,43 @@ import (
 
 var resourceTableHeader = [][]string{{"name", "namespace", "pods", "create time", "images"}}
 
-func (el *eventListener) workloadGraphAction() {
-	el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, "start scrapper", el.getCurrentScrapperType()))
+func (el *eventListener) deploymentGraphAction() {
+	el.workloadGraphAction(workload.DeploymentScrapperTypes)
+}
 
-	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, el.getCurrentScrapperType(), el.getCurrentNamespace())
+func (el *eventListener) statefulSetGraphAction() {
+	el.workloadGraphAction(workload.StatefulSetScrapperTypes)
+}
+
+func (el *eventListener) daemonSetGraphAction() {
+	el.workloadGraphAction(workload.DaemonSetScrapperTypes)
+
+}
+
+func (el *eventListener) replicaSetGraphAction() {
+	el.workloadGraphAction(workload.ReplicaSetScrapperTypes)
+}
+
+func (el *eventListener) cronJobGraphAction() {
+	el.workloadGraphAction(workload.CronJobScrapperTypes)
+}
+
+func (el *eventListener) jobGraphAction() {
+	el.workloadGraphAction(workload.JobScrapperTypes)
+}
+
+func (el *eventListener) workloadGraphAction(scrapperType string) {
+	el.scrapperManagement.StopAllWorkloadScrapper()
+	el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, "start scrapper", scrapperType))
+
+	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, scrapperType, el.getCurrentNamespace())
 	if err != nil {
-		el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), "workloadAction"))
+		el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), "resourceType"))
 		return
 	}
 
 	t := el.tdb.ResourceTable
-	for d := range el.scrapperManagement.GetSpecificScrapperCh(el.getCurrentScrapperType()) {
+	for d := range el.scrapperManagement.GetSpecificScrapperCh(scrapperType) {
 		workloadSData, ok := d.([]workload.WorkloadInfo)
 		if !ok {
 			el.debugCollector.Collect(debug.NewDebugMessage(debug.Error,
@@ -94,23 +120,16 @@ func (el *eventListener) rightKeyboardAction() {
 }
 
 func (el *eventListener) upKeyboardAction() {
-	if el.resourceTypesIndex > 0 {
-		el.scrapperManagement.StopSpecificScrapper(el.getCurrentScrapperType())
-		el.resourceTypesIndex = el.resourceTypesIndex - 1
-	}
-	el.tdb.SelectUp(el.resourceTypesIndex)
-	path := "/" + workloadActionTypes + "/list"
-	el.executeHandler(path)
+	el.tdb.SelectUp()
 	ui.Render(el.tdb.Grid)
 }
 
 func (el *eventListener) downKeyboardAction() {
-	if el.resourceTypesIndex < len(el.resourceTypesList)-1 {
-		el.scrapperManagement.StopSpecificScrapper(el.getCurrentScrapperType())
-		el.resourceTypesIndex = el.resourceTypesIndex + 1
-	}
-	el.tdb.SelectDown(el.resourceTypesIndex)
-	path := "/" + workloadActionTypes + "/list"
-	el.executeHandler(path)
+	el.tdb.SelectDown()
 	ui.Render(el.tdb.Grid)
+}
+
+func (el *eventListener) enterKeyboardAction() {
+	path := el.tdb.Enter()
+	el.executeHandler(path)
 }

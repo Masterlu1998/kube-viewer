@@ -26,6 +26,7 @@ type TerminalDashBoard struct {
 	LogPanel      *widgets.Paragraph
 	ResourceList  *widgets.List
 	Console       *widgets.List
+	Menu          *SideMenu
 }
 
 func InitDashBoard() *TerminalDashBoard {
@@ -39,6 +40,9 @@ func InitDashBoard() *TerminalDashBoard {
 
 	// init namespace tab
 	nTab := widgets.NewTabPane()
+
+	// init menu
+	menu := BuildMenu()
 
 	// init workload tab
 	rList := widgets.NewList()
@@ -65,8 +69,8 @@ func InitDashBoard() *TerminalDashBoard {
 	grid.Set(
 		ui.NewRow(1.0/12, nTab),
 		ui.NewRow(11.0/12,
-			ui.NewCol(1.0/10, ui.NewRow(1, rList)),
-			ui.NewCol(9.0/10,
+			ui.NewCol(2.0/10, ui.NewRow(1, menu)),
+			ui.NewCol(8.0/10,
 				ui.NewRow(2.0/3, rTable),
 				ui.NewRow(1.0/3, console),
 			),
@@ -80,7 +84,7 @@ func InitDashBoard() *TerminalDashBoard {
 	return &TerminalDashBoard{
 		Grid:          grid,
 		ResourceTable: rTable,
-		ResourceList:  rList,
+		Menu:          menu,
 		NamespaceTab:  nTab,
 		YamlPanel:     yPanel,
 		Console:       console,
@@ -88,14 +92,58 @@ func InitDashBoard() *TerminalDashBoard {
 	}
 }
 
-// TODO: these functions are too ugly, we will build structure for every component, each component has own function
-
-func (t *TerminalDashBoard) SelectUp(index int) {
-	t.ResourceList.ScrollUp()
+type menuItem struct {
+	displayName string
+	actionPath  string
 }
 
-func (t *TerminalDashBoard) SelectDown(index int) {
-	t.ResourceList.ScrollDown()
+func newMenuItem(displayName string, path string) menuItem {
+	return menuItem{
+		displayName: displayName,
+		actionPath:  path,
+	}
+}
+
+func (mi menuItem) String() string {
+	return mi.displayName
+}
+
+type SideMenu struct {
+	*widgets.Tree
+	// items []*widgets.TreeNode
+}
+
+func BuildMenu() *SideMenu {
+	var nodes []*widgets.TreeNode
+	for _, resource := range resourceTypes {
+		newNode := &widgets.TreeNode{
+			Value: newMenuItem(resource, "/"+resource+"/list"),
+		}
+		nodes = append(nodes, newNode)
+	}
+
+	items := []*widgets.TreeNode{
+		{
+			Value: newMenuItem("Workload", ""),
+			Nodes: nodes,
+		},
+	}
+
+	menu := widgets.NewTree()
+	menu.SetNodes(items)
+	menu.SelectedRowStyle = ui.NewStyle(ui.ColorYellow)
+
+	return &SideMenu{Tree: menu}
+}
+
+// TODO: these functions are too ugly, we will build structure for every component, each component has own function
+
+func (t *TerminalDashBoard) SelectUp() {
+	t.Menu.ScrollUp()
+}
+
+func (t *TerminalDashBoard) SelectDown() {
+	t.Menu.ScrollDown()
 }
 
 func (t *TerminalDashBoard) Resize() {
@@ -118,4 +166,9 @@ func (t *TerminalDashBoard) ShowDebugInfo(message debug.Message) {
 		t.Console.Rows = t.Console.Rows[1:]
 	}
 	t.Console.ScrollDown()
+}
+
+func (t *TerminalDashBoard) Enter() string {
+	t.Menu.ToggleExpand()
+	return t.Menu.SelectedNode().Value.(menuItem).actionPath
 }

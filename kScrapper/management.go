@@ -20,6 +20,15 @@ type Scrapper interface {
 	StopScrapper()
 }
 
+var workloadScrapperTypes = []string{
+	workload.DeploymentScrapperTypes,
+	workload.StatefulSetScrapperTypes,
+	workload.DaemonSetScrapperTypes,
+	workload.ReplicaSetScrapperTypes,
+	workload.CronJobScrapperTypes,
+	workload.JobScrapperTypes,
+}
+
 func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector) (*ScrapperManagement, error) {
 	kubeClient, err := kube.GetKubernetesClient()
 	if err != nil {
@@ -65,14 +74,26 @@ func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrappe
 }
 
 func (sm *ScrapperManagement) StopSpecificScrapper(scrapperType string) {
+	sm.rwMutex.Lock()
+	defer sm.rwMutex.Unlock()
 	if !sm.activeScrapperMap[scrapperType] {
 		return
 	}
 
-	sm.rwMutex.Lock()
-	defer sm.rwMutex.Unlock()
 	sm.scrapperMap[scrapperType].StopScrapper()
 	delete(sm.activeScrapperMap, scrapperType)
+}
+
+func (sm *ScrapperManagement) StopAllWorkloadScrapper() {
+	sm.rwMutex.Lock()
+	defer sm.rwMutex.Unlock()
+
+	for _, workloadScrapper := range workloadScrapperTypes {
+		if sm.activeScrapperMap[workloadScrapper] {
+			sm.scrapperMap[workloadScrapper].StopScrapper()
+			delete(sm.activeScrapperMap, workloadScrapper)
+		}
+	}
 }
 
 func (sm *ScrapperManagement) GetSpecificScrapperCh(scrapperType string) <-chan common.KubernetesData {
