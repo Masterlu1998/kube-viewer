@@ -111,32 +111,58 @@ func (mi menuItem) String() string {
 
 type SideMenu struct {
 	*widgets.Tree
-	// items []*widgets.TreeNode
 }
 
 func BuildMenu() *SideMenu {
-	var nodes []*widgets.TreeNode
+	var workLoadItem []*widgets.TreeNode
 	for _, resource := range resourceTypes {
 		newNode := &widgets.TreeNode{
 			Value: newMenuItem(resource, "/"+resource+"/list"),
 		}
-		nodes = append(nodes, newNode)
+		workLoadItem = append(workLoadItem, newNode)
 	}
 
 	items := []*widgets.TreeNode{
 		{
-			Value: newMenuItem("Service", "/"+service.ServiceResourceTypes+"/list"),
+			Value: newMenuItem("Overview", ""),
+			Nodes: nil,
+		},
+		{
+			Value: newMenuItem("Cluster", ""),
 			Nodes: nil,
 		},
 		{
 			Value: newMenuItem("Workload", ""),
-			Nodes: nodes,
+			Nodes: workLoadItem,
+		},
+		{
+			Value: newMenuItem("Discovery and Load Balancing", ""),
+			Nodes: []*widgets.TreeNode{
+				{
+					Value: newMenuItem("Service", "/"+service.ServiceResourceTypes+"/list"),
+				},
+			},
+		},
+		{
+			Value: newMenuItem("Config and Storage", ""),
+			Nodes: []*widgets.TreeNode{
+				{
+					Value: newMenuItem("ConfigMaps", ""),
+				},
+				{
+					Value: newMenuItem("Persistent Volume Claims", ""),
+				},
+				{
+					Value: newMenuItem("Secrets", ""),
+				},
+			},
 		},
 	}
 
 	menu := widgets.NewTree()
 	menu.SetNodes(items)
 	menu.SelectedRowStyle = ui.NewStyle(ui.ColorYellow)
+	menu.ExpandAll()
 
 	return &SideMenu{Tree: menu}
 }
@@ -174,6 +200,6 @@ func (t *TerminalDashBoard) ShowDebugInfo(message debug.Message) {
 }
 
 func (t *TerminalDashBoard) Enter() string {
-	t.Menu.ToggleExpand()
+	// t.Menu.ToggleExpand()
 	return t.Menu.SelectedNode().Value.(menuItem).actionPath
 }
