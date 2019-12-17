@@ -2,9 +2,13 @@ package terminal
 
 import (
 	"context"
+	"fmt"
+
+	// "fmt"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 )
@@ -23,7 +27,6 @@ var (
 const (
 	keyboardActionTypes     = "keyboard"
 	namespaceActionTypes    = "namespace"
-	workloadActionTypes     = "workload"
 	debugMessageActionTypes = "debug"
 )
 
@@ -34,7 +37,6 @@ type eventListener struct {
 	resourceTypesList  []string
 	namespacesList     []string
 	pathHandlerMap     map[string]handler
-	resourceTypesIndex int
 	namespacesIndex    int
 	scrapperManagement *kScrapper.ScrapperManagement
 	debugCollector     *debug.DebugCollector
@@ -53,7 +55,6 @@ func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel contex
 		resourceTypesList:  resourceTypesList,
 		namespacesList:     []string{""},
 		pathHandlerMap:     make(map[string]handler),
-		resourceTypesIndex: 0,
 		namespacesIndex:    0,
 		debugCollector:     dc,
 	}
@@ -74,6 +75,7 @@ func (el *eventListener) Register() {
 		"/" + workload.ReplicaSetResourceTypes + "/list":  el.replicaSetGraphAction,
 		"/" + workload.CronJobResourceTypes + "/list":     el.cronJobGraphAction,
 		"/" + workload.JobResourceTypes + "/list":         el.jobGraphAction,
+		"/" + service.ServiceResourceTypes + "/list":      el.serviceGraphAction,
 		"/" + debugMessageActionTypes + "/collect":        el.collectDebugMessage,
 	}
 }
@@ -81,7 +83,6 @@ func (el *eventListener) Register() {
 func (el *eventListener) Listen() error {
 	el.executeHandler("/" + debugMessageActionTypes + "/collect")
 	el.executeHandler("/" + namespaceActionTypes + "/sync")
-	el.executeHandler("/" + workloadActionTypes + "/list")
 
 	for {
 		e := <-ui.PollEvents()
@@ -113,19 +114,12 @@ func (el *eventListener) Listen() error {
 func (el *eventListener) executeHandler(path string) {
 	if handler, ok := el.pathHandlerMap[path]; ok {
 		go handler()
+		el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, fmt.Sprintf("excute path: %s", path), "eventListener"))
+		return
 	}
-
-	return
+	el.debugCollector.Collect(debug.NewDebugMessage(debug.Warn, fmt.Sprintf("no action match path: %s", path), "eventListener"))
 }
 
 func (el *eventListener) getCurrentNamespace() string {
 	return el.namespacesList[el.namespacesIndex]
-}
-
-func (el *eventListener) getCurrentResourceType() string {
-	return el.resourceTypesList[el.resourceTypesIndex]
-}
-
-func (el *eventListener) getCurrentScrapperType() string {
-	return el.resourceTypesList[el.resourceTypesIndex] + "Scrapper"
 }

@@ -1,13 +1,54 @@
 package terminal
 
 import (
+	"fmt"
+
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 )
 
-var resourceTableHeader = [][]string{{"name", "namespace", "pods", "create time", "images"}}
+var (
+	resourceTableHeader = [][]string{{"name", "namespace", "pods", "create time", "images"}}
+	serviceTableHeader  = [][]string{{"name", "namespace", "clusterIP", "ports"}}
+)
+
+func (el *eventListener) serviceGraphAction() {
+	el.scrapperManagement.StopMainScrapper()
+	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, service.ServiceScrapperTypes, el.getCurrentNamespace())
+	if err != nil {
+		el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), "ServiceAction"))
+		return
+	}
+
+	for {
+		select {
+		case <-el.ctx.Done():
+			return
+		case s := <-el.scrapperManagement.GetSpecificScrapperCh(service.ServiceScrapperTypes):
+			el.tdb.ResourceTable.Rows = serviceTableHeader
+			sInfos, ok := s.([]service.Info)
+			if !ok {
+				el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, fmt.Sprintf("convert to service.Info failed"), "ServiceAction"))
+			}
+
+			for _, s := range sInfos {
+				var serviceContent []string
+				serviceContent = append(serviceContent,
+					s.Name,
+					s.Namespace,
+					s.ClusterIP,
+					s.Port,
+				)
+				el.tdb.ResourceTable.Rows = append(el.tdb.ResourceTable.Rows, serviceContent)
+			}
+		}
+		ui.Render(el.tdb.Grid)
+	}
+
+}
 
 func (el *eventListener) deploymentGraphAction() {
 	el.workloadGraphAction(workload.DeploymentScrapperTypes)
@@ -35,7 +76,7 @@ func (el *eventListener) jobGraphAction() {
 }
 
 func (el *eventListener) workloadGraphAction(scrapperType string) {
-	el.scrapperManagement.StopAllWorkloadScrapper()
+	el.scrapperManagement.StopMainScrapper()
 	el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, "start scrapper", scrapperType))
 
 	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, scrapperType, el.getCurrentNamespace())

@@ -2,6 +2,7 @@ package terminal
 
 import (
 	"github.com/Masterlu1998/kube-viewer/debug"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -123,6 +124,10 @@ func BuildMenu() *SideMenu {
 	}
 
 	items := []*widgets.TreeNode{
+		{
+			Value: newMenuItem("Service", "/"+service.ServiceResourceTypes+"/list"),
+			Nodes: nil,
+		},
 		{
 			Value: newMenuItem("Workload", ""),
 			Nodes: nodes,

@@ -3,11 +3,13 @@ package kScrapper
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	"github.com/Masterlu1998/kube-viewer/kube"
 )
@@ -20,13 +22,14 @@ type Scrapper interface {
 	StopScrapper()
 }
 
-var workloadScrapperTypes = []string{
+var mainScrapperTypes = []string{
 	workload.DeploymentScrapperTypes,
 	workload.StatefulSetScrapperTypes,
 	workload.DaemonSetScrapperTypes,
 	workload.ReplicaSetScrapperTypes,
 	workload.CronJobScrapperTypes,
 	workload.JobScrapperTypes,
+	service.ServiceScrapperTypes,
 }
 
 func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector) (*ScrapperManagement, error) {
@@ -44,6 +47,7 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 		workload.ReplicaSetScrapperTypes:  workload.NewReplicaSetScrapper(kubeLister, kubeClient, collector),
 		workload.CronJobScrapperTypes:     workload.NewCronJobScrapper(kubeLister, kubeClient, collector),
 		workload.JobScrapperTypes:         workload.NewJobScrapper(kubeLister, kubeClient, collector),
+		service.ServiceScrapperTypes:      service.NewNamespaceScrapper(kubeLister, kubeClient, collector),
 		namespace.NamespaceScrapperTypes:  namespace.NewNamespaceScrapper(kubeLister, kubeClient, collector),
 	}
 
@@ -51,6 +55,7 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 		scrapperMap:       sMap,
 		activeScrapperMap: make(map[string]bool),
 		namespace:         "",
+		debugCollector:    collector,
 	}, nil
 }
 
@@ -59,6 +64,7 @@ type ScrapperManagement struct {
 	scrapperMap       map[string]Scrapper
 	activeScrapperMap map[string]bool
 	namespace         string
+	debugCollector    *debug.DebugCollector
 }
 
 func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrapperType, namespace string) error {
@@ -84,12 +90,13 @@ func (sm *ScrapperManagement) StopSpecificScrapper(scrapperType string) {
 	delete(sm.activeScrapperMap, scrapperType)
 }
 
-func (sm *ScrapperManagement) StopAllWorkloadScrapper() {
+func (sm *ScrapperManagement) StopMainScrapper() {
 	sm.rwMutex.Lock()
 	defer sm.rwMutex.Unlock()
 
-	for _, workloadScrapper := range workloadScrapperTypes {
+	for _, workloadScrapper := range mainScrapperTypes {
 		if sm.activeScrapperMap[workloadScrapper] {
+			sm.debugCollector.Collect(debug.NewDebugMessage(debug.Info, fmt.Sprintf("stop %s", workloadScrapper), "scrapperManagement"))
 			sm.scrapperMap[workloadScrapper].StopScrapper()
 			delete(sm.activeScrapperMap, workloadScrapper)
 		}
