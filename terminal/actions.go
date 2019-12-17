@@ -23,31 +23,26 @@ func (el *eventListener) serviceGraphAction() {
 		return
 	}
 
-	for {
-		select {
-		case <-el.ctx.Done():
-			return
-		case s := <-el.scrapperManagement.GetSpecificScrapperCh(service.ServiceScrapperTypes):
-			el.tdb.ResourceTable.Rows = serviceTableHeader
-			sInfos, ok := s.([]service.Info)
-			if !ok {
-				el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, fmt.Sprintf("convert to service.Info failed"), "ServiceAction"))
-			}
+	defer el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, "ServiceAction stop", "ServiceAction"))
+	for s := range el.scrapperManagement.GetSpecificScrapperCh(service.ServiceScrapperTypes) {
+		el.tdb.ResourceTable.Rows = serviceTableHeader
+		sInfos, ok := s.([]service.Info)
+		if !ok {
+			el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, fmt.Sprintf("convert to service.Info failed"), "ServiceAction"))
+		}
 
-			for _, s := range sInfos {
-				var serviceContent []string
-				serviceContent = append(serviceContent,
-					s.Name,
-					s.Namespace,
-					s.ClusterIP,
-					s.Port,
-				)
-				el.tdb.ResourceTable.Rows = append(el.tdb.ResourceTable.Rows, serviceContent)
-			}
+		for _, s := range sInfos {
+			var serviceContent []string
+			serviceContent = append(serviceContent,
+				s.Name,
+				s.Namespace,
+				s.ClusterIP,
+				s.Port,
+			)
+			el.tdb.ResourceTable.Rows = append(el.tdb.ResourceTable.Rows, serviceContent)
 		}
 		ui.Render(el.tdb.Grid)
 	}
-
 }
 
 func (el *eventListener) deploymentGraphAction() {
