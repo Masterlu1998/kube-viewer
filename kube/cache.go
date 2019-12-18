@@ -21,6 +21,7 @@ type KubeLister struct {
 	JobLister         batchv1.JobLister
 	NamespaceLister   corev1.NamespaceLister
 	ServiceLister     corev1.ServiceLister
+	ConfigMapLister   corev1.ConfigMapLister
 }
 
 func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeLister {
@@ -33,7 +34,8 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 	cronJobs := informer.Batch().V1beta1().CronJobs()
 	jobs := informer.Batch().V1().Jobs()
 	namespaces := informer.Core().V1().Namespaces()
-	service := informer.Core().V1().Services()
+	services := informer.Core().V1().Services()
+	configMaps := informer.Core().V1().ConfigMaps()
 
 	go informer.Start(ctx.Done())
 
@@ -45,7 +47,8 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 		cronJobs.Informer().HasSynced,
 		jobs.Informer().HasSynced,
 		namespaces.Informer().HasSynced,
-		service.Informer().HasSynced,
+		services.Informer().HasSynced,
+		configMaps.Informer().HasSynced,
 	)
 
 	return &KubeLister{
@@ -56,6 +59,7 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 		CronJobLister:     cronJobs.Lister(),
 		JobLister:         jobs.Lister(),
 		NamespaceLister:   namespaces.Lister(),
-		ServiceLister:     service.Lister(),
+		ServiceLister:     services.Lister(),
+		ConfigMapLister:   configMaps.Lister(),
 	}
 }

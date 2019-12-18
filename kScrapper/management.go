@@ -8,6 +8,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
@@ -30,6 +31,7 @@ var mainScrapperTypes = []string{
 	workload.CronJobScrapperTypes,
 	workload.JobScrapperTypes,
 	service.ServiceScrapperTypes,
+	configMap.ConfigMapScrapperTypes,
 }
 
 func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector) (*ScrapperManagement, error) {
@@ -48,6 +50,7 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 		workload.CronJobScrapperTypes:     workload.NewCronJobScrapper(kubeLister, kubeClient, collector),
 		workload.JobScrapperTypes:         workload.NewJobScrapper(kubeLister, kubeClient, collector),
 		service.ServiceScrapperTypes:      service.NewNamespaceScrapper(kubeLister, kubeClient, collector),
+		configMap.ConfigMapScrapperTypes:  configMap.NewConfigMapScrapper(kubeLister, kubeClient, collector),
 		namespace.NamespaceScrapperTypes:  namespace.NewNamespaceScrapper(kubeLister, kubeClient, collector),
 	}
 

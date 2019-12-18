@@ -8,8 +8,10 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
+	"github.com/Masterlu1998/kube-viewer/terminal/component"
 	ui "github.com/gizak/termui/v3"
 )
 
@@ -32,7 +34,7 @@ const (
 
 type eventListener struct {
 	ctx                context.Context
-	tdb                *TerminalDashBoard
+	tdb                *component.TerminalDashBoard
 	cancelFunc         context.CancelFunc
 	resourceTypesList  []string
 	namespacesList     []string
@@ -44,7 +46,7 @@ type eventListener struct {
 
 type handler func()
 
-func newEventListener(ctx context.Context, tdb *TerminalDashBoard, cancel context.CancelFunc,
+func newEventListener(ctx context.Context, tdb *component.TerminalDashBoard, cancel context.CancelFunc,
 	sm *kScrapper.ScrapperManagement,
 	dc *debug.DebugCollector) *eventListener {
 	return &eventListener{
@@ -76,6 +78,7 @@ func (el *eventListener) Register() {
 		"/" + workload.CronJobResourceTypes + "/list":     el.cronJobGraphAction,
 		"/" + workload.JobResourceTypes + "/list":         el.jobGraphAction,
 		"/" + service.ServiceResourceTypes + "/list":      el.serviceGraphAction,
+		"/" + configMap.ConfigMapResourceTypes + "/list":  el.configMapAction,
 		"/" + debugMessageActionTypes + "/collect":        el.collectDebugMessage,
 	}
 }

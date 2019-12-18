@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
+	"github.com/Masterlu1998/kube-viewer/terminal/component"
 	ui "github.com/gizak/termui/v3"
 )
 
@@ -15,7 +16,7 @@ func Run(ctx context.Context, cancel context.CancelFunc, sm *kScrapper.ScrapperM
 	}
 	defer ui.Close()
 
-	tdb := InitDashBoard()
+	tdb := component.InitDashBoard()
 
 	eventListener := newEventListener(ctx, tdb, cancel, sm, dc)
 

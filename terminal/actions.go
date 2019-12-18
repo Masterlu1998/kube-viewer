@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
@@ -11,9 +12,38 @@ import (
 )
 
 var (
-	resourceTableHeader = [][]string{{"name", "namespace", "pods", "create time", "images"}}
-	serviceTableHeader  = [][]string{{"name", "namespace", "clusterIP", "ports"}}
+	resourceTableHeader  = [][]string{{"name", "namespace", "pods", "create time", "images"}}
+	serviceTableHeader   = [][]string{{"name", "namespace", "clusterIP", "ports"}}
+	configMapTableHeader = [][]string{{"name", "namespace", "create time"}}
 )
+
+func (el *eventListener) configMapAction() {
+	el.scrapperManagement.StopMainScrapper()
+	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, configMap.ConfigMapScrapperTypes, el.getCurrentNamespace())
+	if err != nil {
+		el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), "ServiceAction"))
+		return
+	}
+
+	for c := range el.scrapperManagement.GetSpecificScrapperCh(configMap.ConfigMapScrapperTypes) {
+		configMapInfos, ok := c.([]configMap.Info)
+		if !ok {
+			el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, fmt.Sprintf("convert to configMap.Info failed"), "ConfigMapAction"))
+			return
+		}
+
+		newConfigMapTableData := configMapTableHeader
+		for _, cInfo := range configMapInfos {
+			newConfigMapTableData = append(newConfigMapTableData, []string{
+				cInfo.Name,
+				cInfo.Namespace,
+				cInfo.CreateTime,
+			})
+		}
+		el.tdb.ResourceTable.RefreshTableData(newConfigMapTableData)
+		ui.Render(el.tdb)
+	}
+}
 
 func (el *eventListener) serviceGraphAction() {
 	el.scrapperManagement.StopMainScrapper()
@@ -23,25 +53,23 @@ func (el *eventListener) serviceGraphAction() {
 		return
 	}
 
-	defer el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, "ServiceAction stop", "ServiceAction"))
 	for s := range el.scrapperManagement.GetSpecificScrapperCh(service.ServiceScrapperTypes) {
-		el.tdb.ResourceTable.Rows = serviceTableHeader
-		sInfos, ok := s.([]service.Info)
+		newServiceTableData := serviceTableHeader
+		serviceInfos, ok := s.([]service.Info)
 		if !ok {
 			el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, fmt.Sprintf("convert to service.Info failed"), "ServiceAction"))
 		}
 
-		for _, s := range sInfos {
-			var serviceContent []string
-			serviceContent = append(serviceContent,
-				s.Name,
-				s.Namespace,
-				s.ClusterIP,
-				s.Port,
-			)
-			el.tdb.ResourceTable.Rows = append(el.tdb.ResourceTable.Rows, serviceContent)
+		for _, serviceInfo := range serviceInfos {
+			newServiceTableData = append(newServiceTableData, []string{
+				serviceInfo.Name,
+				serviceInfo.Namespace,
+				serviceInfo.ClusterIP,
+				serviceInfo.Port,
+			})
 		}
-		ui.Render(el.tdb.Grid)
+		el.tdb.ResourceTable.RefreshTableData(newServiceTableData)
+		ui.Render(el.tdb)
 	}
 }
 
@@ -80,7 +108,6 @@ func (el *eventListener) workloadGraphAction(scrapperType string) {
 		return
 	}
 
-	t := el.tdb.ResourceTable
 	for d := range el.scrapperManagement.GetSpecificScrapperCh(scrapperType) {
 		workloadSData, ok := d.([]workload.WorkloadInfo)
 		if !ok {
@@ -94,18 +121,18 @@ func (el *eventListener) workloadGraphAction(scrapperType string) {
 				"workload list is empty", "workloadAction"))
 		}
 
-		t.Rows = resourceTableHeader
+		newWorkloadTableData := resourceTableHeader
 		for _, wd := range workloadSData {
-			var deploymentContent []string
-			deploymentContent = append(deploymentContent,
+			newWorkloadTableData = append(newWorkloadTableData, []string{
 				wd.Name,
 				wd.Namespace,
-				wd.PodsLive+"/"+wd.PodsTotal,
+				wd.PodsLive + "/" + wd.PodsTotal,
 				wd.CreateTime,
-				wd.Images)
-			t.Rows = append(t.Rows, deploymentContent)
+				wd.Images,
+			})
 		}
-		ui.Render(el.tdb.Grid)
+		el.tdb.ResourceTable.RefreshTableData(newWorkloadTableData)
+		ui.Render(el.tdb)
 	}
 }
 
@@ -124,48 +151,48 @@ func (el *eventListener) syncNamespaceAction() {
 			namespaces := []string{""}
 			namespaces = append(namespaces, ns.([]string)...)
 			el.namespacesList = namespaces
-			el.tdb.NamespaceTab.TabNames = namespaces
+			el.tdb.NamespaceTab.RefreshNamespace(namespaces)
 		}
-		ui.Render(el.tdb.Grid)
+		ui.Render(el.tdb)
 	}
 }
 
 func (el *eventListener) collectDebugMessage() {
 	for m := range el.debugCollector.GetDebugMessageCh() {
-		el.tdb.ShowDebugInfo(m)
-		ui.Render(el.tdb.Grid)
+		el.tdb.Console.ShowDebugInfo(m)
+		ui.Render(el.tdb)
 	}
 }
 
 func (el *eventListener) leftKeyboardAction() {
-	el.tdb.MoveTabLeft()
+	el.tdb.NamespaceTab.FocusLeft()
 	if el.namespacesIndex > 0 {
 		el.namespacesIndex = el.namespacesIndex - 1
 	}
 	el.scrapperManagement.ResetNamespace(el.getCurrentNamespace())
-	ui.Render(el.tdb.Grid)
+	ui.Render(el.tdb)
 }
 
 func (el *eventListener) rightKeyboardAction() {
-	el.tdb.MoveTabRight()
+	el.tdb.NamespaceTab.FocusRight()
 	if el.namespacesIndex < len(el.namespacesList)-1 {
 		el.namespacesIndex = el.namespacesIndex + 1
 	}
 	el.scrapperManagement.ResetNamespace(el.getCurrentNamespace())
-	ui.Render(el.tdb.Grid)
+	ui.Render(el.tdb)
 }
 
 func (el *eventListener) upKeyboardAction() {
-	el.tdb.SelectUp()
-	ui.Render(el.tdb.Grid)
+	el.tdb.Menu.ScrollUp()
+	ui.Render(el.tdb)
 }
 
 func (el *eventListener) downKeyboardAction() {
-	el.tdb.SelectDown()
-	ui.Render(el.tdb.Grid)
+	el.tdb.Menu.ScrollDown()
+	ui.Render(el.tdb)
 }
 
 func (el *eventListener) enterKeyboardAction() {
-	path := el.tdb.Enter()
+	path := el.tdb.Menu.Enter()
 	el.executeHandler(path)
 }
