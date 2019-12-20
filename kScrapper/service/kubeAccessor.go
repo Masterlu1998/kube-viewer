@@ -33,9 +33,9 @@ func (ka *kubeAccessor) getServices(namespace string) ([]Info, error) {
 		for _, p := range s.Spec.Ports {
 			var itemPort string
 			if p.NodePort != 0 {
-				itemPort = fmt.Sprintf("%d->%d->%d:%s ", p.NodePort, p.Port, p.TargetPort.IntValue(), p.Protocol)
+				itemPort = fmt.Sprintf("%d->%d->%d/%s ", p.NodePort, p.Port, p.TargetPort.IntValue(), p.Protocol)
 			} else {
-				itemPort = fmt.Sprintf("%d->%d:%s ", p.Port, p.TargetPort.IntValue(), p.Protocol)
+				itemPort = fmt.Sprintf("%d->%d/%s ", p.Port, p.TargetPort.IntValue(), p.Protocol)
 			}
 			ports += itemPort
 		}

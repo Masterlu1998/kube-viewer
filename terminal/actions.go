@@ -6,6 +6,7 @@ import (
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/secret"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
@@ -17,7 +18,35 @@ var (
 	configMapTableHeader = [][]string{{"name", "namespace", "create time"}}
 )
 
-func (el *eventListener) configMapAction() {
+func (el *eventListener) secretGraphAction() {
+	el.scrapperManagement.StopMainScrapper()
+	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, secret.SecretScrapperTypes, el.getCurrentNamespace())
+	if err != nil {
+		el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), "SecretAction"))
+		return
+	}
+
+	for c := range el.scrapperManagement.GetSpecificScrapperCh(secret.SecretScrapperTypes) {
+		configMapInfos, ok := c.([]secret.Info)
+		if !ok {
+			el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, fmt.Sprintf("convert to secret.Info failed"), "SecretAction"))
+			return
+		}
+
+		newConfigMapTableData := configMapTableHeader
+		for _, cInfo := range configMapInfos {
+			newConfigMapTableData = append(newConfigMapTableData, []string{
+				cInfo.Name,
+				cInfo.Namespace,
+				cInfo.CreateTime,
+			})
+		}
+		el.tdb.ResourceTable.RefreshTableData(newConfigMapTableData)
+		ui.Render(el.tdb)
+	}
+}
+
+func (el *eventListener) configMapGraphAction() {
 	el.scrapperManagement.StopMainScrapper()
 	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, configMap.ConfigMapScrapperTypes, el.getCurrentNamespace())
 	if err != nil {

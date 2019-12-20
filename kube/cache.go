@@ -22,6 +22,7 @@ type KubeLister struct {
 	NamespaceLister   corev1.NamespaceLister
 	ServiceLister     corev1.ServiceLister
 	ConfigMapLister   corev1.ConfigMapLister
+	SecretLister      corev1.SecretLister
 }
 
 func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeLister {
@@ -36,6 +37,7 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 	namespaces := informer.Core().V1().Namespaces()
 	services := informer.Core().V1().Services()
 	configMaps := informer.Core().V1().ConfigMaps()
+	secrets := informer.Core().V1().Secrets()
 
 	go informer.Start(ctx.Done())
 
@@ -49,6 +51,7 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 		namespaces.Informer().HasSynced,
 		services.Informer().HasSynced,
 		configMaps.Informer().HasSynced,
+		secrets.Informer().HasSynced,
 	)
 
 	return &KubeLister{
@@ -61,5 +64,6 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 		NamespaceLister:   namespaces.Lister(),
 		ServiceLister:     services.Lister(),
 		ConfigMapLister:   configMaps.Lister(),
+		SecretLister:      secrets.Lister(),
 	}
 }

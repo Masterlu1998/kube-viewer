@@ -2,6 +2,7 @@ package component
 
 import (
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/secret"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -51,7 +52,7 @@ func buildSideMenu() *sideMenu {
 					Value: newMenuItem("Persistent Volume Claims", ""),
 				},
 				{
-					Value: newMenuItem("Secrets", ""),
+					Value: newMenuItem("Secrets", "/"+secret.SecretResourceTypes+"/list"),
 				},
 			},
 		},
