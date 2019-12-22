@@ -6,6 +6,7 @@ import (
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/pvc"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/secret"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
@@ -16,7 +17,42 @@ var (
 	resourceTableHeader  = [][]string{{"name", "namespace", "pods", "create time", "images"}}
 	serviceTableHeader   = [][]string{{"name", "namespace", "clusterIP", "ports"}}
 	configMapTableHeader = [][]string{{"name", "namespace", "create time"}}
+	pvcTableHeader       = [][]string{{"name", "namespace", "status", "volume", "request", "limit", "accessMode", "storageClass", "create time"}}
 )
+
+func (el *eventListener) pvcGraphAction() {
+	el.scrapperManagement.StopMainScrapper()
+	err := el.scrapperManagement.StartSpecificScrapper(el.ctx, pvc.PVCScrapperTypes, el.getCurrentNamespace())
+	if err != nil {
+		el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), "PVCAction"))
+		return
+	}
+
+	for c := range el.scrapperManagement.GetSpecificScrapperCh(pvc.PVCScrapperTypes) {
+		pvcInfos, ok := c.([]pvc.Info)
+		if !ok {
+			el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, fmt.Sprintf("convert to pvc.Info failed"), "PVCAction"))
+			return
+		}
+
+		newPVCTableData := pvcTableHeader
+		for _, pvcInfo := range pvcInfos {
+			newPVCTableData = append(newPVCTableData, []string{
+				pvcInfo.Name,
+				pvcInfo.Namespace,
+				pvcInfo.Status,
+				pvcInfo.Volume,
+				pvcInfo.Request,
+				pvcInfo.Limit,
+				pvcInfo.AccessMode,
+				pvcInfo.StorageClass,
+				pvcInfo.CreateTime,
+			})
+		}
+		el.tdb.ResourceTable.RefreshTableData(newPVCTableData)
+		ui.Render(el.tdb)
+	}
+}
 
 func (el *eventListener) secretGraphAction() {
 	el.scrapperManagement.StopMainScrapper()

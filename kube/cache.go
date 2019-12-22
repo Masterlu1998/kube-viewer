@@ -23,6 +23,7 @@ type KubeLister struct {
 	ServiceLister     corev1.ServiceLister
 	ConfigMapLister   corev1.ConfigMapLister
 	SecretLister      corev1.SecretLister
+	PVCLister         corev1.PersistentVolumeClaimLister
 }
 
 func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeLister {
@@ -38,6 +39,7 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 	services := informer.Core().V1().Services()
 	configMaps := informer.Core().V1().ConfigMaps()
 	secrets := informer.Core().V1().Secrets()
+	pvcs := informer.Core().V1().PersistentVolumeClaims()
 
 	go informer.Start(ctx.Done())
 
@@ -52,6 +54,7 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 		services.Informer().HasSynced,
 		configMaps.Informer().HasSynced,
 		secrets.Informer().HasSynced,
+		pvcs.Informer().HasSynced,
 	)
 
 	return &KubeLister{
@@ -65,5 +68,6 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 		ServiceLister:     services.Lister(),
 		ConfigMapLister:   configMaps.Lister(),
 		SecretLister:      secrets.Lister(),
+		PVCLister:         pvcs.Lister(),
 	}
 }
