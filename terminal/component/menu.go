@@ -2,6 +2,7 @@ package component
 
 import (
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/pv"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/pvc"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/secret"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
@@ -29,7 +30,11 @@ func buildSideMenu() *sideMenu {
 		},
 		{
 			Value: newMenuItem("Cluster", ""),
-			Nodes: nil,
+			Nodes: []*widgets.TreeNode{
+				{
+					Value: newMenuItem("Persistent Volumes", "/"+pv.PVResourceTypes+"/list"),
+				},
+			},
 		},
 		{
 			Value: newMenuItem("Workload", ""),

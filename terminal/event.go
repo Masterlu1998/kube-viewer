@@ -9,6 +9,7 @@ import (
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/pv"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/pvc"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/secret"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
@@ -83,7 +84,9 @@ func (el *eventListener) Register() {
 		"/" + configMap.ConfigMapResourceTypes + "/list":  el.configMapGraphAction,
 		"/" + secret.SecretResourceTypes + "/list":        el.secretGraphAction,
 		"/" + pvc.PVCResourceTypes + "/list":              el.pvcGraphAction,
-		"/" + debugMessageActionTypes + "/collect":        el.collectDebugMessage,
+		"/" + pv.PVResourceTypes + "/list":                el.pvGraphAction,
+
+		"/" + debugMessageActionTypes + "/collect": el.collectDebugMessage,
 	}
 }
 

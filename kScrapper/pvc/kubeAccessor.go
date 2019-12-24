@@ -40,10 +40,12 @@ func (ka *kubeAccessor) getPVCs(namespace string) ([]Info, error) {
 			allAccessMode += string(am) + " "
 		}
 		r, l := s.Spec.Resources.Requests[v1.ResourceStorage], s.Spec.Resources.Limits[v1.ResourceStorage]
+
 		sClass := ""
 		if s.Spec.StorageClassName != nil {
 			sClass = *s.Spec.StorageClassName
 		}
+
 		pvcInfos = append(pvcInfos, Info{
 			Name:         s.Name,
 			Namespace:    s.Namespace,

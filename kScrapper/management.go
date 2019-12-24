@@ -10,6 +10,7 @@ import (
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/pv"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/pvc"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/secret"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
@@ -36,6 +37,7 @@ var mainScrapperTypes = []string{
 	configMap.ConfigMapScrapperTypes,
 	secret.SecretScrapperTypes,
 	pvc.PVCScrapperTypes,
+	pvc.PVCScrapperTypes,
 }
 
 func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector) (*ScrapperManagement, error) {
@@ -57,6 +59,7 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 		configMap.ConfigMapScrapperTypes:  configMap.NewConfigMapScrapper(kubeLister, kubeClient, collector),
 		secret.SecretScrapperTypes:        secret.NewSecretScrapper(kubeLister, kubeClient, collector),
 		pvc.PVCScrapperTypes:              pvc.NewPVCScrapper(kubeLister, kubeClient, collector),
+		pv.PVScrapperTypes:                pv.NewPVScrapper(kubeLister, kubeClient, collector),
 		namespace.NamespaceScrapperTypes:  namespace.NewNamespaceScrapper(kubeLister, kubeClient, collector),
 	}
 
