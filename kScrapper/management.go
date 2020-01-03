@@ -37,7 +37,7 @@ var mainScrapperTypes = []string{
 	configMap.ConfigMapScrapperTypes,
 	secret.SecretScrapperTypes,
 	pvc.PVCScrapperTypes,
-	pvc.PVCScrapperTypes,
+	pv.PVScrapperTypes,
 }
 
 func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector) (*ScrapperManagement, error) {
