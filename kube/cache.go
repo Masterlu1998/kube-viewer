@@ -25,6 +25,9 @@ type KubeLister struct {
 	SecretLister      corev1.SecretLister
 	PVCLister         corev1.PersistentVolumeClaimLister
 	PVLister          corev1.PersistentVolumeLister
+	NodeLister        corev1.NodeLister
+	PodMetricLister   cache.GenericLister
+	NodeMetricLister  cache.GenericLister
 }
 
 func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeLister {
@@ -42,6 +45,7 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 	secrets := informer.Core().V1().Secrets()
 	pvcs := informer.Core().V1().PersistentVolumeClaims()
 	pvs := informer.Core().V1().PersistentVolumes()
+	nodes := informer.Core().V1().Nodes()
 
 	go informer.Start(ctx.Done())
 
@@ -58,6 +62,7 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 		secrets.Informer().HasSynced,
 		pvcs.Informer().HasSynced,
 		pvs.Informer().HasSynced,
+		nodes.Informer().HasSynced,
 	)
 
 	return &KubeLister{
@@ -73,5 +78,6 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 		SecretLister:      secrets.Lister(),
 		PVCLister:         pvcs.Lister(),
 		PVLister:          pvs.Lister(),
+		NodeLister:        nodes.Lister(),
 	}
 }

@@ -41,10 +41,10 @@ func (w *PVScrapper) StartScrapper(ctx context.Context, namespace string) {
 }
 
 func (w *PVScrapper) scrapeDataIntoCh(namespace string) (common.KubernetesData, error) {
-	configMapInfos, err := w.kubeAccessor.getPVs(namespace)
+	PVInfos, err := w.kubeAccessor.getPVs(namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	return configMapInfos, nil
+	return PVInfos, nil
 }
