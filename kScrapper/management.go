@@ -50,6 +50,7 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 
 	kubeLister := kube.NewKubeLister(ctx, kubeClient)
 
+	// TODO: I will make a factory to create scrapper
 	sMap := map[string]Scrapper{
 		workload.DeploymentScrapperTypes:  workload.NewDeploymentScrapper(kubeLister, kubeClient, collector),
 		workload.StatefulSetScrapperTypes: workload.NewStatefulSetScrapper(kubeLister, kubeClient, collector),
@@ -95,6 +96,7 @@ func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrappe
 	return errors.New("no this scrapper type")
 }
 
+// TODO: maybe useless
 func (sm *ScrapperManagement) StopSpecificScrapper(scrapperType string) {
 	sm.rwMutex.Lock()
 	defer sm.rwMutex.Unlock()

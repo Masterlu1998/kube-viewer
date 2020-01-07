@@ -72,6 +72,14 @@ func buildSideMenu() *sideMenu {
 	return &sideMenu{Tree: menu}
 }
 
+func (m *sideMenu) selectedToggle() {
+	if m.BorderStyle == termui.NewStyle(selectedPanelColor) {
+		m.BorderStyle = termui.NewStyle(termui.ColorClear)
+	} else {
+		m.BorderStyle = termui.NewStyle(selectedPanelColor)
+	}
+}
+
 func (m *sideMenu) Enter() string {
 	// t.Menu.ToggleExpand()
 	return m.SelectedNode().Value.(menuItem).actionPath

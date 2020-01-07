@@ -49,8 +49,8 @@ func (el *eventListener) nodeGraphAction() {
 				nodeInfo.OSImage,
 			})
 		}
-		el.tdb.ResourceTable.RefreshTableData(newPVTableData)
-		ui.Render(el.tdb)
+		el.terminalDashBoard.ResourceTable.RefreshTableData(newPVTableData)
+		ui.Render(el.terminalDashBoard)
 	}
 }
 
@@ -81,8 +81,8 @@ func (el *eventListener) pvGraphAction() {
 				pvcInfo.CreateTime,
 			})
 		}
-		el.tdb.ResourceTable.RefreshTableData(newPVTableData)
-		ui.Render(el.tdb)
+		el.terminalDashBoard.ResourceTable.RefreshTableData(newPVTableData)
+		ui.Render(el.terminalDashBoard)
 	}
 }
 
@@ -115,8 +115,8 @@ func (el *eventListener) pvcGraphAction() {
 				pvcInfo.CreateTime,
 			})
 		}
-		el.tdb.ResourceTable.RefreshTableData(newPVCTableData)
-		ui.Render(el.tdb)
+		el.terminalDashBoard.ResourceTable.RefreshTableData(newPVCTableData)
+		ui.Render(el.terminalDashBoard)
 	}
 }
 
@@ -143,8 +143,8 @@ func (el *eventListener) secretGraphAction() {
 				cInfo.CreateTime,
 			})
 		}
-		el.tdb.ResourceTable.RefreshTableData(newConfigMapTableData)
-		ui.Render(el.tdb)
+		el.terminalDashBoard.ResourceTable.RefreshTableData(newConfigMapTableData)
+		ui.Render(el.terminalDashBoard)
 	}
 }
 
@@ -171,8 +171,8 @@ func (el *eventListener) configMapGraphAction() {
 				cInfo.CreateTime,
 			})
 		}
-		el.tdb.ResourceTable.RefreshTableData(newConfigMapTableData)
-		ui.Render(el.tdb)
+		el.terminalDashBoard.ResourceTable.RefreshTableData(newConfigMapTableData)
+		ui.Render(el.terminalDashBoard)
 	}
 }
 
@@ -199,8 +199,8 @@ func (el *eventListener) serviceGraphAction() {
 				serviceInfo.Port,
 			})
 		}
-		el.tdb.ResourceTable.RefreshTableData(newServiceTableData)
-		ui.Render(el.tdb)
+		el.terminalDashBoard.ResourceTable.RefreshTableData(newServiceTableData)
+		ui.Render(el.terminalDashBoard)
 	}
 }
 
@@ -262,8 +262,8 @@ func (el *eventListener) workloadGraphAction(scrapperType string) {
 				wd.Images,
 			})
 		}
-		el.tdb.ResourceTable.RefreshTableData(newWorkloadTableData)
-		ui.Render(el.tdb)
+		el.terminalDashBoard.ResourceTable.RefreshTableData(newWorkloadTableData)
+		ui.Render(el.terminalDashBoard)
 	}
 }
 
@@ -282,48 +282,53 @@ func (el *eventListener) syncNamespaceAction() {
 			namespaces := []string{""}
 			namespaces = append(namespaces, ns.([]string)...)
 			el.namespacesList = namespaces
-			el.tdb.NamespaceTab.RefreshNamespace(namespaces)
+			el.terminalDashBoard.NamespaceTab.RefreshNamespace(namespaces)
 		}
-		ui.Render(el.tdb)
+		ui.Render(el.terminalDashBoard)
 	}
 }
 
 func (el *eventListener) collectDebugMessage() {
 	for m := range el.debugCollector.GetDebugMessageCh() {
-		el.tdb.Console.ShowDebugInfo(m)
-		ui.Render(el.tdb)
+		el.terminalDashBoard.Console.ShowDebugInfo(m)
+		ui.Render(el.terminalDashBoard)
 	}
 }
 
+func (el *eventListener) tabKeyboardAction() {
+	el.terminalDashBoard.SwitchNextPanel()
+	el.currentPanel = el.terminalDashBoard.GetCurrentPanelTypes()
+}
+
 func (el *eventListener) leftKeyboardAction() {
-	el.tdb.NamespaceTab.FocusLeft()
+	el.terminalDashBoard.NamespaceTab.FocusLeft()
 	if el.namespacesIndex > 0 {
 		el.namespacesIndex = el.namespacesIndex - 1
 	}
 	el.scrapperManagement.ResetNamespace(el.getCurrentNamespace())
-	ui.Render(el.tdb)
+	ui.Render(el.terminalDashBoard)
 }
 
 func (el *eventListener) rightKeyboardAction() {
-	el.tdb.NamespaceTab.FocusRight()
+	el.terminalDashBoard.NamespaceTab.FocusRight()
 	if el.namespacesIndex < len(el.namespacesList)-1 {
 		el.namespacesIndex = el.namespacesIndex + 1
 	}
 	el.scrapperManagement.ResetNamespace(el.getCurrentNamespace())
-	ui.Render(el.tdb)
+	ui.Render(el.terminalDashBoard)
 }
 
 func (el *eventListener) upKeyboardAction() {
-	el.tdb.Menu.ScrollUp()
-	ui.Render(el.tdb)
+	el.terminalDashBoard.Menu.ScrollUp()
+	ui.Render(el.terminalDashBoard)
 }
 
 func (el *eventListener) downKeyboardAction() {
-	el.tdb.Menu.ScrollDown()
-	ui.Render(el.tdb)
+	el.terminalDashBoard.Menu.ScrollDown()
+	ui.Render(el.terminalDashBoard)
 }
 
 func (el *eventListener) enterKeyboardAction() {
-	path := el.tdb.Menu.Enter()
+	path := el.terminalDashBoard.Menu.Enter()
 	el.executeHandler(path)
 }

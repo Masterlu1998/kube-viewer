@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	// "fmt"
-
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
@@ -38,7 +36,7 @@ const (
 
 type eventListener struct {
 	ctx                context.Context
-	tdb                *component.TerminalDashBoard
+	terminalDashBoard  *component.TerminalDashBoard
 	cancelFunc         context.CancelFunc
 	resourceTypesList  []string
 	namespacesList     []string
@@ -46,6 +44,7 @@ type eventListener struct {
 	namespacesIndex    int
 	scrapperManagement *kScrapper.ScrapperManagement
 	debugCollector     *debug.DebugCollector
+	currentPanel       component.PanelTypes
 }
 
 type handler func()
@@ -55,7 +54,7 @@ func newEventListener(ctx context.Context, tdb *component.TerminalDashBoard, can
 	dc *debug.DebugCollector) *eventListener {
 	return &eventListener{
 		ctx:                ctx,
-		tdb:                tdb,
+		terminalDashBoard:  tdb,
 		cancelFunc:         cancel,
 		scrapperManagement: sm,
 		resourceTypesList:  resourceTypesList,
@@ -63,16 +62,21 @@ func newEventListener(ctx context.Context, tdb *component.TerminalDashBoard, can
 		pathHandlerMap:     make(map[string]handler),
 		namespacesIndex:    0,
 		debugCollector:     dc,
+		currentPanel:       component.MenuPanel,
 	}
 }
 
 func (el *eventListener) Register() {
 	el.pathHandlerMap = map[string]handler{
-		"/" + keyboardActionTypes + "/left":  el.leftKeyboardAction,
-		"/" + keyboardActionTypes + "/right": el.rightKeyboardAction,
-		"/" + keyboardActionTypes + "/up":    el.upKeyboardAction,
-		"/" + keyboardActionTypes + "/down":  el.downKeyboardAction,
-		"/" + keyboardActionTypes + "/enter": el.enterKeyboardAction,
+		"/" + keyboardActionTypes + "/left":                                      el.leftKeyboardAction,
+		"/" + keyboardActionTypes + "/right":                                     el.rightKeyboardAction,
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/up":    el.upKeyboardAction,
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/down":  el.downKeyboardAction,
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/enter": el.enterKeyboardAction,
+		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/up":    el.upKeyboardAction,
+		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/down":  el.downKeyboardAction,
+		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/enter": el.enterKeyboardAction,
+		"/" + keyboardActionTypes + "/tab": el.tabKeyboardAction,
 
 		"/" + namespaceActionTypes + "/sync":              el.syncNamespaceAction,
 		"/" + workload.DeploymentResourceTypes + "/list":  el.deploymentGraphAction,
@@ -100,12 +104,15 @@ func (el *eventListener) Listen() error {
 		e := <-ui.PollEvents()
 		switch e.ID {
 		case "<Resize>":
-			el.tdb.Resize()
+			el.terminalDashBoard.Resize()
 		case "q":
 			el.cancelFunc()
 			return nil
+		case "<Tab>":
+			path := "/" + keyboardActionTypes + "/tab"
+			el.executeHandler(path)
 		case "<Enter>":
-			path := "/" + keyboardActionTypes + "/enter"
+			path := "/" + string(el.currentPanel) + "/" + keyboardActionTypes + "/enter"
 			el.executeHandler(path)
 		case "<Left>":
 			path := "/" + keyboardActionTypes + "/left"
@@ -114,10 +121,10 @@ func (el *eventListener) Listen() error {
 			path := "/" + keyboardActionTypes + "/right"
 			el.executeHandler(path)
 		case "<Up>":
-			path := "/" + keyboardActionTypes + "/up"
+			path := "/" + string(el.currentPanel) + "/" + keyboardActionTypes + "/up"
 			el.executeHandler(path)
 		case "<Down>":
-			path := "/" + keyboardActionTypes + "/down"
+			path := "/" + string(el.currentPanel) + "/" + keyboardActionTypes + "/down"
 			el.executeHandler(path)
 		}
 	}

@@ -16,17 +16,35 @@ var (
 	}
 )
 
+type PanelTypes string
+
+const (
+	MenuPanel         PanelTypes = "menu"
+	ResourceListPanel PanelTypes = "resourceList"
+)
+
+type panelNode struct {
+	next  *panelNode
+	types PanelTypes
+}
+
+var panelIndex = []PanelTypes{MenuPanel, ResourceListPanel}
+
+const selectedPanelColor = ui.ColorYellow
+
 type TerminalDashBoard struct {
 	*ui.Grid
 	Menu          *sideMenu
 	ResourceTable *resourceTable
 	NamespaceTab  *namespaceTab
 	Console       *debugConsole
+	selectedPanel *panelNode
 }
 
 func InitDashBoard() *TerminalDashBoard {
 	// init menu
 	menu := buildSideMenu()
+	menu.selectedToggle()
 
 	// init workload rTable
 	rTable := BuildResourceTable()
@@ -52,17 +70,53 @@ func InitDashBoard() *TerminalDashBoard {
 		),
 	)
 
+	// init selected panel list
+	headPanelNode := initPanelLinkedList()
+
 	return &TerminalDashBoard{
 		Grid:          grid,
 		ResourceTable: rTable,
 		Menu:          menu,
 		NamespaceTab:  nTab,
 		Console:       console,
+		selectedPanel: headPanelNode,
 	}
+}
+
+func initPanelLinkedList() *panelNode {
+	head := &panelNode{types: MenuPanel}
+	cur := head
+	for i := 1; i < len(panelIndex); i++ {
+		n := &panelNode{types: panelIndex[i]}
+		cur.next = n
+		cur = cur.next
+	}
+
+	cur.next = head
+	return head
 }
 
 func (t *TerminalDashBoard) Resize() {
 	termWidth, termHeight := ui.TerminalDimensions()
 	t.Grid.SetRect(0, 0, termWidth, termHeight)
 	ui.Render(t)
+}
+
+func (t *TerminalDashBoard) SwitchNextPanel() {
+	t.selectPanel()
+	t.selectedPanel = t.selectedPanel.next
+	t.selectPanel()
+}
+
+func (t *TerminalDashBoard) GetCurrentPanelTypes() PanelTypes {
+	return t.selectedPanel.types
+}
+
+func (t *TerminalDashBoard) selectPanel() {
+	switch t.selectedPanel.types {
+	case MenuPanel:
+		t.Menu.selectedToggle()
+	case ResourceListPanel:
+		t.ResourceTable.selectedToggle()
+	}
 }

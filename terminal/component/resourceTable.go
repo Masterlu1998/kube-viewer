@@ -24,3 +24,11 @@ func BuildResourceTable() *resourceTable {
 func (r *resourceTable) RefreshTableData(newData [][]string) {
 	r.Rows = newData
 }
+
+func (r *resourceTable) selectedToggle() {
+	if r.BorderStyle == ui.NewStyle(selectedPanelColor) {
+		r.BorderStyle = ui.NewStyle(ui.ColorClear)
+	} else {
+		r.BorderStyle = ui.NewStyle(selectedPanelColor)
+	}
+}
