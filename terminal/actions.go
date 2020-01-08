@@ -16,12 +16,20 @@ import (
 )
 
 var (
-	resourceTableHeader  = [][]string{{"name", "namespace", "pods", "create time", "images"}}
-	serviceTableHeader   = [][]string{{"name", "namespace", "clusterIP", "ports"}}
-	configMapTableHeader = [][]string{{"name", "namespace", "create time"}}
-	pvcTableHeader       = [][]string{{"name", "namespace", "status", "volume", "request", "limit", "accessMode", "storageClass", "create time"}}
-	pvTableHeader        = [][]string{{"name", "capacity", "accessMode", "reclaim policy", "status", "storage class", "create time"}}
-	nodeTableHeader      = [][]string{{"name", "status", "roles", "address", "OSImage"}}
+	workloadTableHeader    = []string{"name", "namespace", "pods", "create time", "images"}
+	workloadTableColWidth  = []int{40, 22, 10, 30, 40}
+	serviceTableHeader     = []string{"name", "namespace", "clusterIP", "ports"}
+	serviceTableColWidth   = []int{30, 25, 20, 50}
+	configMapTableHeader   = []string{"name", "namespace", "create time"}
+	configMapTableColWidth = []int{40, 25, 40}
+	secretTableHeader      = []string{"name", "namespace", "create time"}
+	secretTableColWidth    = []int{40, 25, 40}
+	pvcTableHeader         = []string{"name", "namespace", "status", "volume", "request", "limit", "accessMode", "storageClass", "create time"}
+	pvcTableColWidth       = []int{20, 20, 20, 20, 20, 20, 20, 20, 20}
+	pvTableHeader          = []string{"name", "capacity", "accessMode", "reclaim policy", "status", "storage class", "create time"}
+	pvTableColWidth        = []int{15, 10, 20, 20, 15, 20, 30}
+	nodeTableHeader        = []string{"name", "status", "roles", "address", "OSImage"}
+	nodeTableColWidth      = []int{20, 20, 15, 30, 20}
 )
 
 func (el *eventListener) nodeGraphAction() {
@@ -39,9 +47,9 @@ func (el *eventListener) nodeGraphAction() {
 			return
 		}
 
-		newPVTableData := nodeTableHeader
+		newNodeTableData := make([][]string, 0)
 		for _, nodeInfo := range nodeInfos {
-			newPVTableData = append(newPVTableData, []string{
+			newNodeTableData = append(newNodeTableData, []string{
 				nodeInfo.Name,
 				nodeInfo.Status,
 				nodeInfo.Roles,
@@ -49,7 +57,7 @@ func (el *eventListener) nodeGraphAction() {
 				nodeInfo.OSImage,
 			})
 		}
-		el.terminalDashBoard.ResourceTable.RefreshTableData(newPVTableData)
+		el.terminalDashBoard.ResourcePanel.RefreshPanelData(nodeTableHeader, newNodeTableData, nodeTableColWidth)
 		ui.Render(el.terminalDashBoard)
 	}
 }
@@ -69,19 +77,19 @@ func (el *eventListener) pvGraphAction() {
 			return
 		}
 
-		newPVTableData := pvTableHeader
-		for _, pvcInfo := range pvInfos {
+		newPVTableData := make([][]string, 0)
+		for _, pvInfo := range pvInfos {
 			newPVTableData = append(newPVTableData, []string{
-				pvcInfo.Name,
-				pvcInfo.Capacity,
-				pvcInfo.AccessMode,
-				pvcInfo.ReclaimPolicy,
-				pvcInfo.Status,
-				pvcInfo.StorageClass,
-				pvcInfo.CreateTime,
+				pvInfo.Name,
+				pvInfo.Capacity,
+				pvInfo.AccessMode,
+				pvInfo.ReclaimPolicy,
+				pvInfo.Status,
+				pvInfo.StorageClass,
+				pvInfo.CreateTime,
 			})
 		}
-		el.terminalDashBoard.ResourceTable.RefreshTableData(newPVTableData)
+		el.terminalDashBoard.ResourcePanel.RefreshPanelData(pvTableHeader, newPVTableData, pvTableColWidth)
 		ui.Render(el.terminalDashBoard)
 	}
 }
@@ -101,7 +109,7 @@ func (el *eventListener) pvcGraphAction() {
 			return
 		}
 
-		newPVCTableData := pvcTableHeader
+		newPVCTableData := make([][]string, 0)
 		for _, pvcInfo := range pvcInfos {
 			newPVCTableData = append(newPVCTableData, []string{
 				pvcInfo.Name,
@@ -115,7 +123,7 @@ func (el *eventListener) pvcGraphAction() {
 				pvcInfo.CreateTime,
 			})
 		}
-		el.terminalDashBoard.ResourceTable.RefreshTableData(newPVCTableData)
+		el.terminalDashBoard.ResourcePanel.RefreshPanelData(pvcTableHeader, newPVCTableData, pvcTableColWidth)
 		ui.Render(el.terminalDashBoard)
 	}
 }
@@ -129,21 +137,21 @@ func (el *eventListener) secretGraphAction() {
 	}
 
 	for c := range el.scrapperManagement.GetSpecificScrapperCh(secret.SecretScrapperTypes) {
-		configMapInfos, ok := c.([]secret.Info)
+		secretInfos, ok := c.([]secret.Info)
 		if !ok {
 			el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, fmt.Sprintf("convert to secret.Info failed"), "SecretAction"))
 			return
 		}
 
-		newConfigMapTableData := configMapTableHeader
-		for _, cInfo := range configMapInfos {
-			newConfigMapTableData = append(newConfigMapTableData, []string{
+		newSecretTableData := make([][]string, 0)
+		for _, cInfo := range secretInfos {
+			newSecretTableData = append(newSecretTableData, []string{
 				cInfo.Name,
 				cInfo.Namespace,
 				cInfo.CreateTime,
 			})
 		}
-		el.terminalDashBoard.ResourceTable.RefreshTableData(newConfigMapTableData)
+		el.terminalDashBoard.ResourcePanel.RefreshPanelData(secretTableHeader, newSecretTableData, secretTableColWidth)
 		ui.Render(el.terminalDashBoard)
 	}
 }
@@ -163,7 +171,7 @@ func (el *eventListener) configMapGraphAction() {
 			return
 		}
 
-		newConfigMapTableData := configMapTableHeader
+		newConfigMapTableData := make([][]string, 0)
 		for _, cInfo := range configMapInfos {
 			newConfigMapTableData = append(newConfigMapTableData, []string{
 				cInfo.Name,
@@ -171,7 +179,7 @@ func (el *eventListener) configMapGraphAction() {
 				cInfo.CreateTime,
 			})
 		}
-		el.terminalDashBoard.ResourceTable.RefreshTableData(newConfigMapTableData)
+		el.terminalDashBoard.ResourcePanel.RefreshPanelData(configMapTableHeader, newConfigMapTableData, configMapTableColWidth)
 		ui.Render(el.terminalDashBoard)
 	}
 }
@@ -185,7 +193,7 @@ func (el *eventListener) serviceGraphAction() {
 	}
 
 	for s := range el.scrapperManagement.GetSpecificScrapperCh(service.ServiceScrapperTypes) {
-		newServiceTableData := serviceTableHeader
+		newServiceTableData := make([][]string, 0)
 		serviceInfos, ok := s.([]service.Info)
 		if !ok {
 			el.debugCollector.Collect(debug.NewDebugMessage(debug.Error, fmt.Sprintf("convert to service.Info failed"), "ServiceAction"))
@@ -199,7 +207,7 @@ func (el *eventListener) serviceGraphAction() {
 				serviceInfo.Port,
 			})
 		}
-		el.terminalDashBoard.ResourceTable.RefreshTableData(newServiceTableData)
+		el.terminalDashBoard.ResourcePanel.RefreshPanelData(serviceTableHeader, newServiceTableData, serviceTableColWidth)
 		ui.Render(el.terminalDashBoard)
 	}
 }
@@ -252,7 +260,7 @@ func (el *eventListener) workloadGraphAction(scrapperType string) {
 				"workload list is empty", "workloadAction"))
 		}
 
-		newWorkloadTableData := resourceTableHeader
+		newWorkloadTableData := make([][]string, 0)
 		for _, wd := range workloadSData {
 			newWorkloadTableData = append(newWorkloadTableData, []string{
 				wd.Name,
@@ -262,7 +270,7 @@ func (el *eventListener) workloadGraphAction(scrapperType string) {
 				wd.Images,
 			})
 		}
-		el.terminalDashBoard.ResourceTable.RefreshTableData(newWorkloadTableData)
+		el.terminalDashBoard.ResourcePanel.RefreshPanelData(workloadTableHeader, newWorkloadTableData, workloadTableColWidth)
 		ui.Render(el.terminalDashBoard)
 	}
 }
@@ -318,17 +326,32 @@ func (el *eventListener) rightKeyboardAction() {
 	ui.Render(el.terminalDashBoard)
 }
 
-func (el *eventListener) upKeyboardAction() {
+func (el *eventListener) upMenuKeyboardAction() {
 	el.terminalDashBoard.Menu.ScrollUp()
 	ui.Render(el.terminalDashBoard)
 }
 
-func (el *eventListener) downKeyboardAction() {
+func (el *eventListener) downMenuKeyboardAction() {
 	el.terminalDashBoard.Menu.ScrollDown()
 	ui.Render(el.terminalDashBoard)
 }
 
-func (el *eventListener) enterKeyboardAction() {
+func (el *eventListener) enterMenuKeyboardAction() {
 	path := el.terminalDashBoard.Menu.Enter()
 	el.executeHandler(path)
 }
+
+func (el *eventListener) upResourceListKeyboardAction() {
+	el.terminalDashBoard.ResourcePanel.ScrollUp()
+	ui.Render(el.terminalDashBoard)
+}
+
+func (el *eventListener) downResourceListKeyboardAction() {
+	el.terminalDashBoard.ResourcePanel.ScrollDown()
+	ui.Render(el.terminalDashBoard)
+}
+
+// func (el *eventListener) enterResourceListKeyboardAction() {
+// 	path := el.terminalDashBoard.Menu.Enter()
+// 	el.executeHandler(path)
+// }

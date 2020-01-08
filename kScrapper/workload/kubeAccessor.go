@@ -79,8 +79,8 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 			sInfo := WorkloadInfo{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
-				PodsLive:   "per node",
-				PodsTotal:  "per node",
+				PodsLive:   "",
+				PodsTotal:  "",
 				CreateTime: item.ObjectMeta.CreationTimestamp.Format(time.RFC3339),
 				Images:     item.Spec.Template.Spec.Containers[0].Image,
 			}

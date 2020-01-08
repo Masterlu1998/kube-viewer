@@ -35,10 +35,10 @@ const selectedPanelColor = ui.ColorYellow
 type TerminalDashBoard struct {
 	*ui.Grid
 	Menu          *sideMenu
-	ResourceTable *resourceTable
 	NamespaceTab  *namespaceTab
 	Console       *debugConsole
 	selectedPanel *panelNode
+	ResourcePanel *resourcePanel
 }
 
 func InitDashBoard() *TerminalDashBoard {
@@ -47,7 +47,7 @@ func InitDashBoard() *TerminalDashBoard {
 	menu.selectedToggle()
 
 	// init workload rTable
-	rTable := BuildResourceTable()
+	rTable := BuildResourcePanel()
 
 	// init namespace tab
 	nTab := buildNamespaceTab()
@@ -75,7 +75,7 @@ func InitDashBoard() *TerminalDashBoard {
 
 	return &TerminalDashBoard{
 		Grid:          grid,
-		ResourceTable: rTable,
+		ResourcePanel: rTable,
 		Menu:          menu,
 		NamespaceTab:  nTab,
 		Console:       console,
@@ -117,6 +117,6 @@ func (t *TerminalDashBoard) selectPanel() {
 	case MenuPanel:
 		t.Menu.selectedToggle()
 	case ResourceListPanel:
-		t.ResourceTable.selectedToggle()
+		t.ResourcePanel.selectedToggle()
 	}
 }

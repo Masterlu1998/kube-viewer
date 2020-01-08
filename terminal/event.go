@@ -68,14 +68,14 @@ func newEventListener(ctx context.Context, tdb *component.TerminalDashBoard, can
 
 func (el *eventListener) Register() {
 	el.pathHandlerMap = map[string]handler{
-		"/" + keyboardActionTypes + "/left":                                      el.leftKeyboardAction,
-		"/" + keyboardActionTypes + "/right":                                     el.rightKeyboardAction,
-		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/up":    el.upKeyboardAction,
-		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/down":  el.downKeyboardAction,
-		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/enter": el.enterKeyboardAction,
-		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/up":    el.upKeyboardAction,
-		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/down":  el.downKeyboardAction,
-		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/enter": el.enterKeyboardAction,
+		"/" + keyboardActionTypes + "/left":                                             el.leftKeyboardAction,
+		"/" + keyboardActionTypes + "/right":                                            el.rightKeyboardAction,
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/up":           el.upMenuKeyboardAction,
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/down":         el.downMenuKeyboardAction,
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/enter":        el.enterMenuKeyboardAction,
+		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/up":   el.upResourceListKeyboardAction,
+		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/down": el.downResourceListKeyboardAction,
+		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/enter": el.enterMenuKeyboardAction,
 		"/" + keyboardActionTypes + "/tab": el.tabKeyboardAction,
 
 		"/" + namespaceActionTypes + "/sync":              el.syncNamespaceAction,
