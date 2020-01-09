@@ -7,9 +7,15 @@ type namespaceTab struct {
 }
 
 func buildNamespaceTab() *namespaceTab {
+	nTab := widgets.NewTabPane()
+	nTab.TabNames = []string{""}
 	return &namespaceTab{
-		TabPane: widgets.NewTabPane(),
+		TabPane: nTab,
 	}
+}
+
+func (n *namespaceTab) GetCurrentNamespace() string {
+	return n.TabNames[n.ActiveTabIndex]
 }
 
 func (n *namespaceTab) RefreshNamespace(newNamespaceData []string) {

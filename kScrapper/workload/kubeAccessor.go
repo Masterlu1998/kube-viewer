@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type WorkloadInfo struct {
+type Info struct {
 	Name       string
 	Namespace  string
 	PodsLive   string
@@ -32,8 +32,8 @@ func generateKubeAccessor(lister *kube.KubeLister, client *kubernetes.Clientset)
 	}
 }
 
-func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]WorkloadInfo, error) {
-	var workloadInfos []WorkloadInfo
+func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Info, error) {
+	var workloadInfos []Info
 	switch workloadTypes {
 	case DeploymentResourceTypes:
 		deploymentList, err := ka.kubernetesLister.DeploymentLister.Deployments(namespace).List(labels.Everything())
@@ -42,7 +42,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 		}
 
 		for _, item := range deploymentList {
-			sInfo := WorkloadInfo{
+			sInfo := Info{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   strconv.Itoa(int(item.Status.ReadyReplicas)),
@@ -59,7 +59,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 		}
 
 		for _, item := range statefulSetList {
-			sInfo := WorkloadInfo{
+			sInfo := Info{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   strconv.Itoa(int(item.Status.ReadyReplicas)),
@@ -76,7 +76,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 		}
 
 		for _, item := range daemonSetList {
-			sInfo := WorkloadInfo{
+			sInfo := Info{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   "",
@@ -93,7 +93,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 		}
 
 		for _, item := range replicaSetList {
-			sInfo := WorkloadInfo{
+			sInfo := Info{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   strconv.Itoa(int(item.Status.ReadyReplicas)),
@@ -110,7 +110,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 		}
 
 		for _, item := range jobList {
-			sInfo := WorkloadInfo{
+			sInfo := Info{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   "null",
@@ -127,7 +127,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Workloa
 		}
 
 		for _, item := range cronJobList {
-			sInfo := WorkloadInfo{
+			sInfo := Info{
 				Name:       item.Name,
 				Namespace:  item.Namespace,
 				PodsLive:   "null",

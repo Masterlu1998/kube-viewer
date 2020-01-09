@@ -19,46 +19,46 @@ func buildSideMenu() *sideMenu {
 	var workLoadItem []*widgets.TreeNode
 	for _, resource := range resourceTypes {
 		newNode := &widgets.TreeNode{
-			Value: newMenuItem(resource, "/"+resource+"/list"),
+			Value: newMenuItem(resource, "/"+resource+"/list", resource),
 		}
 		workLoadItem = append(workLoadItem, newNode)
 	}
 
 	items := []*widgets.TreeNode{
 		{
-			Value: newMenuItem("Overview", ""),
+			Value: newMenuItem("Overview", "", ""),
 			Nodes: nil,
 		},
 		{
-			Value: newMenuItem("Cluster", ""),
+			Value: newMenuItem("Cluster", "", ""),
 			Nodes: []*widgets.TreeNode{
-				{Value: newMenuItem("Persistent Volumes", "/"+pv.PVResourceTypes+"/list")},
-				{Value: newMenuItem("Nodes", "/"+node.NodeResourceTypes+"/list")},
+				{Value: newMenuItem("Persistent Volumes", "/"+pv.PVResourceTypes+"/list", pv.PVResourceTypes)},
+				{Value: newMenuItem("Nodes", "/"+node.NodeResourceTypes+"/list", node.NodeResourceTypes)},
 			},
 		},
 		{
-			Value: newMenuItem("Workload", ""),
+			Value: newMenuItem("Workload", "", ""),
 			Nodes: workLoadItem,
 		},
 		{
-			Value: newMenuItem("Discovery and Load Balancing", ""),
+			Value: newMenuItem("Discovery and Load Balancing", "", ""),
 			Nodes: []*widgets.TreeNode{
 				{
-					Value: newMenuItem("Service", "/"+service.ServiceResourceTypes+"/list"),
+					Value: newMenuItem("Service", "/"+service.ServiceResourceTypes+"/list", service.ServiceResourceTypes),
 				},
 			},
 		},
 		{
-			Value: newMenuItem("Config and Storage", ""),
+			Value: newMenuItem("Config and Storage", "", ""),
 			Nodes: []*widgets.TreeNode{
 				{
-					Value: newMenuItem("ConfigMaps", "/"+configMap.ConfigMapResourceTypes+"/list"),
+					Value: newMenuItem("ConfigMaps", "/"+configMap.ConfigMapResourceTypes+"/list", configMap.ConfigMapResourceTypes),
 				},
 				{
-					Value: newMenuItem("Persistent Volume Claims", "/"+pvc.PVCResourceTypes+"/list"),
+					Value: newMenuItem("Persistent Volume Claims", "/"+pvc.PVCResourceTypes+"/list", pvc.PVCResourceTypes),
 				},
 				{
-					Value: newMenuItem("Secrets", "/"+secret.SecretResourceTypes+"/list"),
+					Value: newMenuItem("Secrets", "/"+secret.SecretResourceTypes+"/list", secret.SecretResourceTypes),
 				},
 			},
 		},
@@ -81,19 +81,24 @@ func (m *sideMenu) selectedToggle() {
 }
 
 func (m *sideMenu) Enter() string {
-	// t.Menu.ToggleExpand()
 	return m.SelectedNode().Value.(menuItem).actionPath
 }
 
-type menuItem struct {
-	displayName string
-	actionPath  string
+func (m *sideMenu) GetSelectedResourceTypes() string {
+	return m.SelectedNode().Value.(menuItem).resourceTypes
 }
 
-func newMenuItem(displayName string, path string) menuItem {
+type menuItem struct {
+	displayName   string
+	actionPath    string
+	resourceTypes string
+}
+
+func newMenuItem(displayName string, path string, resourceTypes string) menuItem {
 	return menuItem{
-		displayName: displayName,
-		actionPath:  path,
+		displayName:   displayName,
+		actionPath:    path,
+		resourceTypes: resourceTypes,
 	}
 }
 

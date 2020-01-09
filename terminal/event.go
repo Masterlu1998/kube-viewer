@@ -13,6 +13,7 @@ import (
 	"github.com/Masterlu1998/kube-viewer/kScrapper/secret"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
+	"github.com/Masterlu1998/kube-viewer/terminal/actions"
 	"github.com/Masterlu1998/kube-viewer/terminal/component"
 	ui "github.com/gizak/termui/v3"
 )
@@ -39,15 +40,10 @@ type eventListener struct {
 	terminalDashBoard  *component.TerminalDashBoard
 	cancelFunc         context.CancelFunc
 	resourceTypesList  []string
-	namespacesList     []string
-	pathHandlerMap     map[string]handler
-	namespacesIndex    int
+	pathHandlerMap     map[string]actions.ActionHandler
 	scrapperManagement *kScrapper.ScrapperManagement
 	debugCollector     *debug.DebugCollector
-	currentPanel       component.PanelTypes
 }
-
-type handler func()
 
 func newEventListener(ctx context.Context, tdb *component.TerminalDashBoard, cancel context.CancelFunc,
 	sm *kScrapper.ScrapperManagement,
@@ -58,48 +54,43 @@ func newEventListener(ctx context.Context, tdb *component.TerminalDashBoard, can
 		cancelFunc:         cancel,
 		scrapperManagement: sm,
 		resourceTypesList:  resourceTypesList,
-		namespacesList:     []string{""},
-		pathHandlerMap:     make(map[string]handler),
-		namespacesIndex:    0,
+		pathHandlerMap:     make(map[string]actions.ActionHandler),
 		debugCollector:     dc,
-		currentPanel:       component.MenuPanel,
 	}
 }
 
 func (el *eventListener) Register() {
-	el.pathHandlerMap = map[string]handler{
-		"/" + keyboardActionTypes + "/left":                                             el.leftKeyboardAction,
-		"/" + keyboardActionTypes + "/right":                                            el.rightKeyboardAction,
-		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/up":           el.upMenuKeyboardAction,
-		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/down":         el.downMenuKeyboardAction,
-		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/enter":        el.enterMenuKeyboardAction,
-		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/up":   el.upResourceListKeyboardAction,
-		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/down": el.downResourceListKeyboardAction,
-		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/enter": el.enterMenuKeyboardAction,
-		"/" + keyboardActionTypes + "/tab": el.tabKeyboardAction,
+	el.pathHandlerMap = map[string]actions.ActionHandler{
+		"/" + keyboardActionTypes + "/left":                                             actions.BuildLeftKeyboardAction(),
+		"/" + keyboardActionTypes + "/right":                                            actions.BuildRightKeyboardAction(),
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/up":           actions.BuildUpMenuKeyboardAction(),
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/down":         actions.BuildDownMenuKeyboardAction(),
+		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/up":   actions.BuildUpResourceListKeyboardAction(),
+		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/down": actions.BuildDownResourceListKeyboardAction(),
+		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/enter": el.enterResourceListKeyboardAction,
+		"/" + keyboardActionTypes + "/tab": actions.BuildTabKeyboardAction(),
 
-		"/" + namespaceActionTypes + "/sync":              el.syncNamespaceAction,
-		"/" + workload.DeploymentResourceTypes + "/list":  el.deploymentGraphAction,
-		"/" + workload.StatefulSetResourceTypes + "/list": el.statefulSetGraphAction,
-		"/" + workload.DaemonSetResourceTypes + "/list":   el.daemonSetGraphAction,
-		"/" + workload.ReplicaSetResourceTypes + "/list":  el.replicaSetGraphAction,
-		"/" + workload.CronJobResourceTypes + "/list":     el.cronJobGraphAction,
-		"/" + workload.JobResourceTypes + "/list":         el.jobGraphAction,
-		"/" + service.ServiceResourceTypes + "/list":      el.serviceGraphAction,
-		"/" + configMap.ConfigMapResourceTypes + "/list":  el.configMapGraphAction,
-		"/" + secret.SecretResourceTypes + "/list":        el.secretGraphAction,
-		"/" + pvc.PVCResourceTypes + "/list":              el.pvcGraphAction,
-		"/" + pv.PVResourceTypes + "/list":                el.pvGraphAction,
-		"/" + node.NodeResourceTypes + "/list":            el.nodeGraphAction,
+		"/" + namespaceActionTypes + "/sync":              actions.BuildSyncNamespaceAction(),
+		"/" + workload.DeploymentResourceTypes + "/list":  actions.BuildDeploymentListAction(),
+		"/" + workload.StatefulSetResourceTypes + "/list": actions.BuildStatefulSetListAction(),
+		"/" + workload.DaemonSetResourceTypes + "/list":   actions.BuildDaemonSetListAction(),
+		"/" + workload.ReplicaSetResourceTypes + "/list":  actions.BuildReplicaSetListAction(),
+		"/" + workload.CronJobResourceTypes + "/list":     actions.BuildCronJobListAction(),
+		"/" + workload.JobResourceTypes + "/list":         actions.BuildJobListAction(),
+		"/" + service.ServiceResourceTypes + "/list":      actions.BuildServiceListAction(),
+		"/" + configMap.ConfigMapResourceTypes + "/list":  actions.BuildConfigMapListAction(),
+		"/" + secret.SecretResourceTypes + "/list":        actions.BuildSecretListAction(),
+		"/" + pvc.PVCResourceTypes + "/list":              actions.BuildPVCListAction(),
+		"/" + pv.PVResourceTypes + "/list":                actions.BuildPVListAction(),
+		"/" + node.NodeResourceTypes + "/list":            actions.BuildNodeListAction(),
 
-		"/" + debugMessageActionTypes + "/collect": el.collectDebugMessage,
+		"/" + debugMessageActionTypes + "/collect": actions.BuildCollectDebugMessageAction(),
 	}
 }
 
 func (el *eventListener) Listen() error {
 	el.executeHandler("/" + debugMessageActionTypes + "/collect")
 	el.executeHandler("/" + namespaceActionTypes + "/sync")
-
 	for {
 		e := <-ui.PollEvents()
 		switch e.ID {
@@ -112,7 +103,7 @@ func (el *eventListener) Listen() error {
 			path := "/" + keyboardActionTypes + "/tab"
 			el.executeHandler(path)
 		case "<Enter>":
-			path := "/" + string(el.currentPanel) + "/" + keyboardActionTypes + "/enter"
+			path := el.terminalDashBoard.Menu.Enter()
 			el.executeHandler(path)
 		case "<Left>":
 			path := "/" + keyboardActionTypes + "/left"
@@ -121,10 +112,10 @@ func (el *eventListener) Listen() error {
 			path := "/" + keyboardActionTypes + "/right"
 			el.executeHandler(path)
 		case "<Up>":
-			path := "/" + string(el.currentPanel) + "/" + keyboardActionTypes + "/up"
+			path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/up"
 			el.executeHandler(path)
 		case "<Down>":
-			path := "/" + string(el.currentPanel) + "/" + keyboardActionTypes + "/down"
+			path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/down"
 			el.executeHandler(path)
 		}
 	}
@@ -132,7 +123,7 @@ func (el *eventListener) Listen() error {
 
 func (el *eventListener) executeHandler(path string) {
 	if handler, ok := el.pathHandlerMap[path]; ok {
-		go handler()
+		go handler(el.ctx, el.terminalDashBoard, el.scrapperManagement, el.debugCollector, el.getCurrentNamespace())
 		el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, fmt.Sprintf("excute path: %s", path), "eventListener"))
 		return
 	}
@@ -140,5 +131,9 @@ func (el *eventListener) executeHandler(path string) {
 }
 
 func (el *eventListener) getCurrentNamespace() string {
-	return el.namespacesList[el.namespacesIndex]
+	return el.terminalDashBoard.NamespaceTab.GetCurrentNamespace()
+}
+
+func (el *eventListener) getCurrentSelectedPanel() component.PanelTypes {
+	return el.terminalDashBoard.GetCurrentPanelTypes()
 }

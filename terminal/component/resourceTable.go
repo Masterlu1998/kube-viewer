@@ -211,3 +211,12 @@ func (rp *resourcePanel) selectedToggle() {
 		rp.BorderStyle = NewStyle(selectedPanelColor)
 	}
 }
+
+func (rp *resourcePanel) GetSelectedUniqueRow() string {
+	return rp.SelectedItem
+}
+
+func (rp *resourcePanel) Reset() {
+	rp.SelectedItem = rp.Rows[0][0]
+	rp.SelectedRow = 0
+}
