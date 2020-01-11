@@ -2,10 +2,13 @@ package namespace
 
 import (
 	"context"
+	"sort"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kube"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -16,18 +19,11 @@ const (
 
 type NamespaceScrapper struct {
 	*common.CommonScrapper
-	kubeAccessor *kubeAccessor
 }
 
 func NewNamespaceScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *NamespaceScrapper {
-	ka := &kubeAccessor{
-		kubernetesClient: client,
-		kubernetesLister: lister,
-	}
-
 	return &NamespaceScrapper{
-		kubeAccessor:   ka,
-		CommonScrapper: common.NewCommonScrapper(dc),
+		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}
 }
 
@@ -40,11 +36,29 @@ func (w *NamespaceScrapper) StartScrapper(ctx context.Context, namespace string)
 
 }
 
-func (w *NamespaceScrapper) scrapeDataIntoCh(namespace string) (common.KubernetesData, error) {
-	namespaceInfos, err := w.kubeAccessor.getNamespaces()
+func (w *NamespaceScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {
+	namespaceInfos, err := w.getNamespaces()
 	if err != nil {
 		return nil, err
 	}
 
 	return namespaceInfos, nil
+}
+
+func (w *NamespaceScrapper) getNamespaces() ([]string, error) {
+	namespaces, err := w.KubernetesLister.NamespaceLister.List(labels.Everything())
+	if err != nil {
+		return nil, err
+	}
+
+	var namespacesInfos []string
+	for _, ns := range namespaces {
+		if ns.Status.Phase == corev1.NamespaceActive {
+			namespacesInfos = append(namespacesInfos, ns.Name)
+		}
+	}
+
+	sort.Strings(namespacesInfos)
+
+	return namespacesInfos, nil
 }

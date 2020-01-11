@@ -2,6 +2,7 @@ package workload
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
@@ -16,13 +17,11 @@ const (
 
 type CronJobScrapper struct {
 	*common.CommonScrapper
-	kubeAccessor *kubeAccessor
 }
 
 func NewCronJobScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *CronJobScrapper {
 	return &CronJobScrapper{
-		kubeAccessor:   generateKubeAccessor(lister, client),
-		CommonScrapper: common.NewCommonScrapper(dc),
+		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}
 }
 
@@ -34,8 +33,13 @@ func (c *CronJobScrapper) StartScrapper(ctx context.Context, namespace string) {
 	c.CommonScrapper.ScrapeDataIntoChWithSource(ctx, c.scrapeDataIntoCh, namespace)
 }
 
-func (c *CronJobScrapper) scrapeDataIntoCh(namespace string) (common.KubernetesData, error) {
-	cronJobs, err := c.kubeAccessor.getWorkloads(CronJobResourceTypes, namespace)
+func (c *CronJobScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {
+	listArgs, ok := args.(common.ListScrapperArgs)
+	if !ok {
+		return nil, errors.New("convert to common.ListScrapperArgs failed")
+	}
+
+	cronJobs, err := getWorkloads(c.KubernetesClient, c.KubernetesLister, CronJobResourceTypes, listArgs.Namespace)
 	if err != nil {
 		return nil, err
 	}

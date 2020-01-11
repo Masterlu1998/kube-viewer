@@ -6,24 +6,30 @@ import (
 	"time"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
+	"github.com/Masterlu1998/kube-viewer/kube"
+	"k8s.io/client-go/kubernetes"
 )
 
 const commonScrapperTypes = "commonScrapper"
 
-type DataSourceFunc func(string) (KubernetesData, error)
+type DataSourceFunc func(args ScrapperArgs) (KubernetesData, error)
 
-func NewCommonScrapper(dc *debug.DebugCollector) *CommonScrapper {
+func NewCommonScrapper(dc *debug.DebugCollector, client kubernetes.Interface, lister *kube.KubeLister) *CommonScrapper {
 	return &CommonScrapper{
-		namespace:      "",
-		debugCollector: dc,
+		namespace:        "",
+		debugCollector:   dc,
+		KubernetesClient: client,
+		KubernetesLister: lister,
 	}
 }
 
 type CommonScrapper struct {
-	stop           chan bool
-	ch             chan KubernetesData
-	namespace      string
-	debugCollector *debug.DebugCollector
+	stop             chan bool
+	ch               chan KubernetesData
+	namespace        string
+	debugCollector   *debug.DebugCollector
+	KubernetesClient kubernetes.Interface
+	KubernetesLister *kube.KubeLister
 }
 
 func (c *CommonScrapper) Watch() <-chan KubernetesData {
@@ -50,7 +56,7 @@ func (c *CommonScrapper) ScrapeDataIntoChWithSource(ctx context.Context, f DataS
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				data, err := f(c.namespace)
+				data, err := f(ListScrapperArgs{Namespace: c.namespace})
 				if err != nil {
 					c.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), commonScrapperTypes))
 					continue

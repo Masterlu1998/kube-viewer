@@ -2,6 +2,7 @@ package workload
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
@@ -16,13 +17,11 @@ const (
 
 type StatefulSetScrapper struct {
 	*common.CommonScrapper
-	kubeAccessor *kubeAccessor
 }
 
 func NewStatefulSetScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *StatefulSetScrapper {
 	return &StatefulSetScrapper{
-		kubeAccessor:   generateKubeAccessor(lister, client),
-		CommonScrapper: common.NewCommonScrapper(dc),
+		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}
 }
 
@@ -34,8 +33,13 @@ func (w *StatefulSetScrapper) StartScrapper(ctx context.Context, namespace strin
 	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
 }
 
-func (w *StatefulSetScrapper) scrapeDataIntoCh(namespace string) (common.KubernetesData, error) {
-	statefulSets, err := w.kubeAccessor.getWorkloads(StatefulSetResourceTypes, namespace)
+func (w *StatefulSetScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {
+	listArgs, ok := args.(common.ListScrapperArgs)
+	if !ok {
+		return nil, errors.New("convert to common.ListScrapperArgs failed")
+	}
+
+	statefulSets, err := getWorkloads(w.KubernetesClient, w.KubernetesLister, StatefulSetResourceTypes, listArgs.Namespace)
 	if err != nil {
 		return nil, err
 	}

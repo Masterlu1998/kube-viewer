@@ -84,13 +84,15 @@ func (el *eventListener) Register() {
 		"/" + pv.PVResourceTypes + "/list":                actions.BuildPVListAction(),
 		"/" + node.NodeResourceTypes + "/list":            actions.BuildNodeListAction(),
 
+		"/" + node.NodeResourceTypes + "/search": actions.BuildNodeListAction(),
+
 		"/" + debugMessageActionTypes + "/collect": actions.BuildCollectDebugMessageAction(),
 	}
 }
 
 func (el *eventListener) Listen() error {
-	el.executeHandler("/" + debugMessageActionTypes + "/collect")
-	el.executeHandler("/" + namespaceActionTypes + "/sync")
+	el.executeHandler("/"+debugMessageActionTypes+"/collect", nil)
+	el.executeHandler("/"+namespaceActionTypes+"/sync", nil)
 	for {
 		e := <-ui.PollEvents()
 		switch e.ID {
@@ -101,29 +103,45 @@ func (el *eventListener) Listen() error {
 			return nil
 		case "<Tab>":
 			path := "/" + keyboardActionTypes + "/tab"
-			el.executeHandler(path)
+			el.executeHandler(path, nil)
 		case "<Enter>":
-			path := el.terminalDashBoard.Menu.Enter()
-			el.executeHandler(path)
+			switch el.terminalDashBoard.GetCurrentPanelTypes() {
+			case component.MenuPanel:
+				path := el.terminalDashBoard.Menu.Enter()
+				el.executeHandler(path, nil)
+			case component.ResourceListPanel:
+				path := "/" + el.terminalDashBoard.Menu.GetSelectedResourceTypes() + "/search"
+				el.executeHandler(path, actions.DetailActionArgs{
+					Namespace: el.terminalDashBoard.NamespaceTab.GetCurrentNamespace(),
+					Name:      el.terminalDashBoard.ResourcePanel.SelectedItem,
+				})
+			}
 		case "<Left>":
 			path := "/" + keyboardActionTypes + "/left"
-			el.executeHandler(path)
+			el.executeHandler(path, nil)
 		case "<Right>":
 			path := "/" + keyboardActionTypes + "/right"
-			el.executeHandler(path)
+			el.executeHandler(path, nil)
 		case "<Up>":
 			path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/up"
-			el.executeHandler(path)
+			el.executeHandler(path, nil)
 		case "<Down>":
 			path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/down"
-			el.executeHandler(path)
+			el.executeHandler(path, nil)
 		}
 	}
 }
 
-func (el *eventListener) executeHandler(path string) {
+func (el *eventListener) executeHandler(path string, args actions.ActionArgs) {
 	if handler, ok := el.pathHandlerMap[path]; ok {
-		go handler(el.ctx, el.terminalDashBoard, el.scrapperManagement, el.debugCollector, el.getCurrentNamespace())
+		go handler(
+			el.ctx,
+			el.terminalDashBoard,
+			el.scrapperManagement,
+			el.debugCollector,
+			el.getCurrentNamespace(),
+			args,
+		)
 		el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, fmt.Sprintf("excute path: %s", path), "eventListener"))
 		return
 	}

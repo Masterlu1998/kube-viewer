@@ -2,6 +2,7 @@ package workload
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
@@ -16,13 +17,11 @@ const (
 
 type DaemonSetScrapper struct {
 	*common.CommonScrapper
-	kubeAccessor *kubeAccessor
 }
 
 func NewDaemonSetScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *DaemonSetScrapper {
 	return &DaemonSetScrapper{
-		kubeAccessor:   generateKubeAccessor(lister, client),
-		CommonScrapper: common.NewCommonScrapper(dc),
+		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}
 }
 
@@ -34,8 +33,13 @@ func (d *DaemonSetScrapper) StartScrapper(ctx context.Context, namespace string)
 	d.CommonScrapper.ScrapeDataIntoChWithSource(ctx, d.scrapeDataIntoCh, namespace)
 }
 
-func (d *DaemonSetScrapper) scrapeDataIntoCh(namespace string) (common.KubernetesData, error) {
-	daemonSets, err := d.kubeAccessor.getWorkloads(DaemonSetResourceTypes, namespace)
+func (d *DaemonSetScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {
+	listArgs, ok := args.(common.ListScrapperArgs)
+	if !ok {
+		return nil, errors.New("convert to common.ListScrapperArgs failed")
+	}
+
+	daemonSets, err := getWorkloads(d.KubernetesClient, d.KubernetesLister, DaemonSetResourceTypes, listArgs.Namespace)
 	if err != nil {
 		return nil, err
 	}

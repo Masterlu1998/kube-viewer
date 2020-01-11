@@ -1,10 +1,13 @@
 package node
 
 import (
+	"context"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/Masterlu1998/kube-viewer/debug"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kube"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -12,8 +15,40 @@ import (
 )
 
 const (
-	masterRoleSpecialLabel = "node-role.kubernetes.io/master"
+	NodeListScrapperTypes   = "NodeListScrapper"
+	NodeDetailScrapperTypes = "NodeDetailScrapper"
+	NodeResourceTypes       = "Node"
+	masterRoleSpecialLabel  = "node-role.kubernetes.io/master"
 )
+
+// Node list scrapper
+type NodeListScrapper struct {
+	*common.CommonScrapper
+}
+
+func NewNodeScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *NodeListScrapper {
+	return &NodeListScrapper{
+		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
+	}
+}
+
+func (w *NodeListScrapper) GetScrapperTypes() string {
+	return NodeListScrapperTypes
+}
+
+func (w *NodeListScrapper) StartScrapper(ctx context.Context, namespace string) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
+
+}
+
+func (w *NodeListScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {
+	nodeInfos, err := w.listNodes()
+	if err != nil {
+		return nil, err
+	}
+
+	return nodeInfos, nil
+}
 
 type Info struct {
 	Name              string
@@ -24,13 +59,8 @@ type Info struct {
 	CreationTimestamp string
 }
 
-type kubeAccessor struct {
-	kubernetesClient kubernetes.Interface
-	kubernetesLister *kube.KubeLister
-}
-
-func (ka *kubeAccessor) getNodes(namespace string) ([]Info, error) {
-	nodes, err := ka.kubernetesLister.NodeLister.List(labels.Everything())
+func (w *NodeListScrapper) listNodes() ([]Info, error) {
+	nodes, err := w.KubernetesLister.NodeLister.List(labels.Everything())
 	if err != nil {
 		return nil, err
 	}

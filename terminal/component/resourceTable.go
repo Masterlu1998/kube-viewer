@@ -217,6 +217,5 @@ func (rp *resourcePanel) GetSelectedUniqueRow() string {
 }
 
 func (rp *resourcePanel) Reset() {
-	rp.SelectedItem = rp.Rows[0][0]
-	rp.SelectedRow = 0
+	rp.ScrollTop()
 }

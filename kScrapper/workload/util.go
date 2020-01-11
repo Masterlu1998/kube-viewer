@@ -20,23 +20,11 @@ type Info struct {
 	Images     string
 }
 
-type kubeAccessor struct {
-	kubernetesClient kubernetes.Interface
-	kubernetesLister *kube.KubeLister
-}
-
-func generateKubeAccessor(lister *kube.KubeLister, client *kubernetes.Clientset) *kubeAccessor {
-	return &kubeAccessor{
-		kubernetesClient: client,
-		kubernetesLister: lister,
-	}
-}
-
-func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Info, error) {
+func getWorkloads(kubernetesClient kubernetes.Interface, kubernetesLister *kube.KubeLister, workloadTypes, namespace string) ([]Info, error) {
 	var workloadInfos []Info
 	switch workloadTypes {
 	case DeploymentResourceTypes:
-		deploymentList, err := ka.kubernetesLister.DeploymentLister.Deployments(namespace).List(labels.Everything())
+		deploymentList, err := kubernetesLister.DeploymentLister.Deployments(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
@@ -53,7 +41,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Info, e
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case StatefulSetResourceTypes:
-		statefulSetList, err := ka.kubernetesLister.StatefulSetLister.StatefulSets(namespace).List(labels.Everything())
+		statefulSetList, err := kubernetesLister.StatefulSetLister.StatefulSets(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
@@ -70,7 +58,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Info, e
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case DaemonSetResourceTypes:
-		daemonSetList, err := ka.kubernetesLister.DaemonSetLister.DaemonSets(namespace).List(labels.Everything())
+		daemonSetList, err := kubernetesLister.DaemonSetLister.DaemonSets(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +75,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Info, e
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case ReplicaSetResourceTypes:
-		replicaSetList, err := ka.kubernetesLister.ReplicaSetsLister.ReplicaSets(namespace).List(labels.Everything())
+		replicaSetList, err := kubernetesLister.ReplicaSetsLister.ReplicaSets(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
@@ -104,7 +92,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Info, e
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case JobResourceTypes:
-		jobList, err := ka.kubernetesLister.JobLister.Jobs(namespace).List(labels.Everything())
+		jobList, err := kubernetesLister.JobLister.Jobs(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
@@ -121,7 +109,7 @@ func (ka *kubeAccessor) getWorkloads(workloadTypes, namespace string) ([]Info, e
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case CronJobResourceTypes:
-		cronJobList, err := ka.kubernetesLister.CronJobLister.CronJobs(namespace).List(labels.Everything())
+		cronJobList, err := kubernetesLister.CronJobLister.CronJobs(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}

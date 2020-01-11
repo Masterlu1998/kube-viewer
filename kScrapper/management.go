@@ -27,6 +27,7 @@ type Scrapper interface {
 	StopScrapper()
 }
 
+// TODO: maybe just namespaces scrapper don't need to stop
 var mainScrapperTypes = []string{
 	workload.DeploymentScrapperTypes,
 	workload.StatefulSetScrapperTypes,
@@ -39,7 +40,8 @@ var mainScrapperTypes = []string{
 	secret.SecretScrapperTypes,
 	pvc.PVCScrapperTypes,
 	pv.PVScrapperTypes,
-	node.NodeScrapperTypes,
+	node.NodeListScrapperTypes,
+	node.NodeDetailScrapperTypes,
 }
 
 func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector) (*ScrapperManagement, error) {
@@ -63,7 +65,9 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 		secret.SecretScrapperTypes:        secret.NewSecretScrapper(kubeLister, kubeClient, collector),
 		pvc.PVCScrapperTypes:              pvc.NewPVCScrapper(kubeLister, kubeClient, collector),
 		pv.PVScrapperTypes:                pv.NewPVScrapper(kubeLister, kubeClient, collector),
-		node.NodeScrapperTypes:            node.NewNodeScrapper(kubeLister, kubeClient, collector),
+		node.NodeListScrapperTypes:        node.NewNodeScrapper(kubeLister, kubeClient, collector),
+
+		node.NodeDetailScrapperTypes: node.NewNodeDetailScrapper(kubeLister, kubeClient, collector),
 
 		namespace.NamespaceScrapperTypes: namespace.NewNamespaceScrapper(kubeLister, kubeClient, collector),
 	}

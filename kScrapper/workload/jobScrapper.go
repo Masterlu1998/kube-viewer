@@ -2,6 +2,7 @@ package workload
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
@@ -16,26 +17,29 @@ const (
 
 type JobScrapper struct {
 	*common.CommonScrapper
-	kubeAccessor *kubeAccessor
 }
 
 func NewJobScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *JobScrapper {
 	return &JobScrapper{
-		kubeAccessor:   generateKubeAccessor(lister, client),
-		CommonScrapper: common.NewCommonScrapper(dc),
+		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}
 }
 
-func (c *JobScrapper) GetScrapperTypes() string {
+func (j *JobScrapper) GetScrapperTypes() string {
 	return JobScrapperTypes
 }
 
-func (c *JobScrapper) StartScrapper(ctx context.Context, namespace string) {
-	c.CommonScrapper.ScrapeDataIntoChWithSource(ctx, c.scrapeDataIntoCh, namespace)
+func (j *JobScrapper) StartScrapper(ctx context.Context, namespace string) {
+	j.CommonScrapper.ScrapeDataIntoChWithSource(ctx, j.scrapeDataIntoCh, namespace)
 }
 
-func (c *JobScrapper) scrapeDataIntoCh(namespace string) (common.KubernetesData, error) {
-	jobs, err := c.kubeAccessor.getWorkloads(JobResourceTypes, namespace)
+func (j *JobScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {
+	listArgs, ok := args.(common.ListScrapperArgs)
+	if !ok {
+		return nil, errors.New("convert to common.ListScrapperArgs failed")
+	}
+
+	jobs, err := getWorkloads(j.KubernetesClient, j.KubernetesLister, StatefulSetResourceTypes, listArgs.Namespace)
 	if err != nil {
 		return nil, err
 	}

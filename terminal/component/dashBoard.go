@@ -23,6 +23,13 @@ const (
 	ResourceListPanel PanelTypes = "resourceList"
 )
 
+type GridTypes int
+
+const (
+	MainGrid GridTypes = iota
+	DetailGrid
+)
+
 type panelNode struct {
 	next  *panelNode
 	types PanelTypes
@@ -34,11 +41,13 @@ const selectedPanelColor = ui.ColorYellow
 
 type TerminalDashBoard struct {
 	*ui.Grid
-	Menu          *sideMenu
-	NamespaceTab  *namespaceTab
-	Console       *debugConsole
-	selectedPanel *panelNode
-	ResourcePanel *resourcePanel
+	Menu             *sideMenu
+	NamespaceTab     *namespaceTab
+	Console          *debugConsole
+	ResourcePanel    *resourcePanel
+	DetailParagraph  *resourceDetailPanel
+	selectedPanel    *panelNode
+	currentGridTypes GridTypes
 }
 
 func InitDashBoard() *TerminalDashBoard {
@@ -54,6 +63,9 @@ func InitDashBoard() *TerminalDashBoard {
 
 	// debug console
 	console := buildDebugConsole()
+
+	// detail paragraph
+	dParagraph := buildDetailParagraph()
 
 	// init layout
 	grid := ui.NewGrid()
@@ -74,12 +86,13 @@ func InitDashBoard() *TerminalDashBoard {
 	headPanelNode := initPanelLinkedList()
 
 	return &TerminalDashBoard{
-		Grid:          grid,
-		ResourcePanel: rTable,
-		Menu:          menu,
-		NamespaceTab:  nTab,
-		Console:       console,
-		selectedPanel: headPanelNode,
+		Grid:            grid,
+		ResourcePanel:   rTable,
+		Menu:            menu,
+		NamespaceTab:    nTab,
+		Console:         console,
+		DetailParagraph: dParagraph,
+		selectedPanel:   headPanelNode,
 	}
 }
 
@@ -102,6 +115,46 @@ func (t *TerminalDashBoard) Resize() {
 	ui.Render(t)
 }
 
+func (t *TerminalDashBoard) RenderDashboard() {
+	ui.Render(t)
+}
+
+func (t *TerminalDashBoard) SwitchGrid(types GridTypes) {
+	switch types {
+	case MainGrid:
+		t.Grid = t.buildMainGrid()
+	case DetailGrid:
+		t.Grid = t.buildDetailGrid()
+	}
+}
+
+func (t *TerminalDashBoard) buildMainGrid() *ui.Grid {
+	grid := ui.NewGrid()
+	termWidth, termHeight := ui.TerminalDimensions()
+	grid.SetRect(0, 0, termWidth, termHeight)
+	grid.Set(
+		ui.NewRow(1.0/12, t.NamespaceTab),
+		ui.NewRow(11.0/12,
+			ui.NewCol(2.0/10, ui.NewRow(1, t.Menu)),
+			ui.NewCol(8.0/10,
+				ui.NewRow(2.0/3, t.ResourcePanel),
+				ui.NewRow(1.0/3, t.Console),
+			),
+		),
+	)
+	return grid
+}
+
+func (t *TerminalDashBoard) buildDetailGrid() *ui.Grid {
+	grid := ui.NewGrid()
+	termWidth, termHeight := ui.TerminalDimensions()
+	grid.SetRect(0, 0, termWidth, termHeight)
+	grid.Set(
+		ui.NewRow(1, t.DetailParagraph),
+	)
+	return grid
+}
+
 func (t *TerminalDashBoard) SwitchNextPanel() {
 	t.selectPanel()
 	t.selectedPanel = t.selectedPanel.next
@@ -119,4 +172,8 @@ func (t *TerminalDashBoard) selectPanel() {
 	case ResourceListPanel:
 		t.ResourcePanel.selectedToggle()
 	}
+}
+
+func (t *TerminalDashBoard) GetCurrentGrid() GridTypes {
+	return t.currentGridTypes
 }
