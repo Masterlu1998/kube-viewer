@@ -34,3 +34,7 @@ func nodeListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, e
 func BuildNodeListAction() ActionHandler {
 	return listResourceAction(nodeListDataGetter, node.NodeListScrapperTypes)
 }
+
+func BuildNodeDetailAction() ActionHandler {
+	return detailResourceAction(node.NodeDetailScrapperTypes)
+}

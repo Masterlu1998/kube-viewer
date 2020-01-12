@@ -25,8 +25,8 @@ func (w *NodeDetailScrapper) GetScrapperTypes() string {
 	return NodeDetailScrapperTypes
 }
 
-func (w *NodeDetailScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
+func (w *NodeDetailScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, args)
 
 }
 

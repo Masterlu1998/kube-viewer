@@ -32,8 +32,8 @@ func (w *PVScrapper) GetScrapperTypes() string {
 	return PVScrapperTypes
 }
 
-func (w *PVScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
+func (w *PVScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, args)
 
 }
 

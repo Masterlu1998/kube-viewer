@@ -29,8 +29,8 @@ func (d *DaemonSetScrapper) GetScrapperTypes() string {
 	return DaemonSetScrapperTypes
 }
 
-func (d *DaemonSetScrapper) StartScrapper(ctx context.Context, namespace string) {
-	d.CommonScrapper.ScrapeDataIntoChWithSource(ctx, d.scrapeDataIntoCh, namespace)
+func (d *DaemonSetScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	d.CommonScrapper.ScrapeDataIntoChWithSource(ctx, d.scrapeDataIntoCh, args)
 }
 
 func (d *DaemonSetScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {

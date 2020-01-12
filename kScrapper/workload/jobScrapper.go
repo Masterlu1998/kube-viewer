@@ -29,8 +29,8 @@ func (j *JobScrapper) GetScrapperTypes() string {
 	return JobScrapperTypes
 }
 
-func (j *JobScrapper) StartScrapper(ctx context.Context, namespace string) {
-	j.CommonScrapper.ScrapeDataIntoChWithSource(ctx, j.scrapeDataIntoCh, namespace)
+func (j *JobScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	j.CommonScrapper.ScrapeDataIntoChWithSource(ctx, j.scrapeDataIntoCh, args)
 }
 
 func (j *JobScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {

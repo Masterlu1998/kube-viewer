@@ -36,8 +36,8 @@ func (w *NodeListScrapper) GetScrapperTypes() string {
 	return NodeListScrapperTypes
 }
 
-func (w *NodeListScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
+func (w *NodeListScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, args)
 
 }
 

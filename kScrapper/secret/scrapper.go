@@ -33,8 +33,8 @@ func (w *SecretScrapper) GetScrapperTypes() string {
 	return SecretScrapperTypes
 }
 
-func (w *SecretScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
+func (w *SecretScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, args)
 
 }
 

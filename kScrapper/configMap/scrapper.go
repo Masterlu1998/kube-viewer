@@ -32,8 +32,8 @@ func (w *ConfigMapScrapper) GetScrapperTypes() string {
 	return ConfigMapScrapperTypes
 }
 
-func (w *ConfigMapScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
+func (w *ConfigMapScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, args)
 
 }
 

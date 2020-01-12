@@ -29,8 +29,8 @@ func (w *StatefulSetScrapper) GetScrapperTypes() string {
 	return StatefulSetScrapperTypes
 }
 
-func (w *StatefulSetScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
+func (w *StatefulSetScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, args)
 }
 
 func (w *StatefulSetScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {

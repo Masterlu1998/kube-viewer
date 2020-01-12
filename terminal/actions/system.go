@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
 	"github.com/Masterlu1998/kube-viewer/terminal/component"
 )
@@ -15,8 +16,7 @@ func BuildUpResourceListKeyboardAction() ActionHandler {
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
 		tdb.ResourcePanel.ScrollUp()
 		tdb.RenderDashboard()
@@ -29,8 +29,7 @@ func BuildDownResourceListKeyboardAction() ActionHandler {
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
 		tdb.ResourcePanel.ScrollDown()
 		tdb.RenderDashboard()
@@ -43,8 +42,7 @@ func BuildUpMenuKeyboardAction() ActionHandler {
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
 		tdb.Menu.ScrollUp()
 		tdb.RenderDashboard()
@@ -57,8 +55,7 @@ func BuildDownMenuKeyboardAction() ActionHandler {
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
 		tdb.Menu.ScrollDown()
 		tdb.RenderDashboard()
@@ -71,8 +68,7 @@ func BuildLeftKeyboardAction() ActionHandler {
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
 		tdb.NamespaceTab.FocusLeft()
 		sm.ResetNamespace(tdb.NamespaceTab.GetCurrentNamespace())
@@ -86,8 +82,7 @@ func BuildRightKeyboardAction() ActionHandler {
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
 		tdb.NamespaceTab.FocusRight()
 		sm.ResetNamespace(tdb.NamespaceTab.GetCurrentNamespace())
@@ -101,8 +96,7 @@ func BuildTabKeyboardAction() ActionHandler {
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
 		tdb.SwitchNextPanel()
 		tdb.ResourcePanel.Reset()
@@ -116,8 +110,7 @@ func BuildCollectDebugMessageAction() ActionHandler {
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
 		for m := range dc.GetDebugMessageCh() {
 			tdb.Console.ShowDebugInfo(m)
@@ -132,10 +125,9 @@ func BuildSyncNamespaceAction() ActionHandler {
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
-		err := sm.StartSpecificScrapper(ctx, namespace.NamespaceScrapperTypes, "")
+		err := sm.StartSpecificScrapper(ctx, namespace.NamespaceScrapperTypes, args)
 		if err != nil {
 			dc.Collect(debug.NewDebugMessage(debug.Error, err.Error(), "namespaceAction"))
 			return

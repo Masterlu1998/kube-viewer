@@ -29,8 +29,8 @@ func (w *DeploymentScrapper) GetScrapperTypes() string {
 	return DeploymentScrapperTypes
 }
 
-func (w *DeploymentScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
+func (w *DeploymentScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, args)
 }
 
 func (w *DeploymentScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {

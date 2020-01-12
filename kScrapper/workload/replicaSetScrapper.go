@@ -29,8 +29,8 @@ func (r *ReplicaSetScrapper) GetScrapperTypes() string {
 	return ReplicaSetScrapperTypes
 }
 
-func (r *ReplicaSetScrapper) StartScrapper(ctx context.Context, namespace string) {
-	r.CommonScrapper.ScrapeDataIntoChWithSource(ctx, r.scrapeDataIntoCh, namespace)
+func (r *ReplicaSetScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	r.CommonScrapper.ScrapeDataIntoChWithSource(ctx, r.scrapeDataIntoCh, args)
 }
 
 func (r *ReplicaSetScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {

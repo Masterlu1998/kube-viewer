@@ -42,8 +42,8 @@ func (c *CommonScrapper) SetNamespace(ns string) {
 	c.namespace = ns
 }
 
-func (c *CommonScrapper) ScrapeDataIntoChWithSource(ctx context.Context, f DataSourceFunc, ns string) {
-	c.SetNamespace(ns)
+func (c *CommonScrapper) ScrapeDataIntoChWithSource(ctx context.Context, f DataSourceFunc, args ScrapperArgs) {
+	c.SetNamespace(args.GetNamespaceField())
 	c.initScrapper()
 
 	go func(ctx context.Context, stop chan bool, f DataSourceFunc) {
@@ -56,7 +56,7 @@ func (c *CommonScrapper) ScrapeDataIntoChWithSource(ctx context.Context, f DataS
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				data, err := f(ListScrapperArgs{Namespace: c.namespace})
+				data, err := f(args)
 				if err != nil {
 					c.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), commonScrapperTypes))
 					continue

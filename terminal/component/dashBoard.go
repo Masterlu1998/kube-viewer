@@ -123,8 +123,10 @@ func (t *TerminalDashBoard) SwitchGrid(types GridTypes) {
 	switch types {
 	case MainGrid:
 		t.Grid = t.buildMainGrid()
+		t.currentGridTypes = MainGrid
 	case DetailGrid:
 		t.Grid = t.buildDetailGrid()
+		t.currentGridTypes = DetailGrid
 	}
 }
 

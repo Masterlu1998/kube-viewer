@@ -22,7 +22,7 @@ import (
 type Scrapper interface {
 	GetScrapperTypes() string
 	Watch() <-chan common.KubernetesData
-	StartScrapper(ctx context.Context, namespace string)
+	StartScrapper(ctx context.Context, args common.ScrapperArgs)
 	SetNamespace(namespace string)
 	StopScrapper()
 }
@@ -88,11 +88,11 @@ type ScrapperManagement struct {
 	debugCollector    *debug.DebugCollector
 }
 
-func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrapperType, namespace string) error {
+func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrapperType string, args common.ScrapperArgs) error {
 	sm.rwMutex.Lock()
 	defer sm.rwMutex.Unlock()
 	if s, ok := sm.scrapperMap[scrapperType]; ok {
-		s.StartScrapper(ctx, namespace)
+		s.StartScrapper(ctx, args)
 		sm.activeScrapperMap[scrapperType] = true
 		return nil
 	}

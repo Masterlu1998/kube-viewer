@@ -32,8 +32,8 @@ func (w *ServiceScrapper) GetScrapperTypes() string {
 	return ServiceScrapperTypes
 }
 
-func (w *ServiceScrapper) StartScrapper(ctx context.Context, namespace string) {
-	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, namespace)
+func (w *ServiceScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	w.CommonScrapper.ScrapeDataIntoChWithSource(ctx, w.scrapeDataIntoCh, args)
 
 }
 

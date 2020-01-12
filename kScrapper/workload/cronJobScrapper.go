@@ -29,8 +29,8 @@ func (c *CronJobScrapper) GetScrapperTypes() string {
 	return CronJobScrapperTypes
 }
 
-func (c *CronJobScrapper) StartScrapper(ctx context.Context, namespace string) {
-	c.CommonScrapper.ScrapeDataIntoChWithSource(ctx, c.scrapeDataIntoCh, namespace)
+func (c *CronJobScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
+	c.CommonScrapper.ScrapeDataIntoChWithSource(ctx, c.scrapeDataIntoCh, args)
 }
 
 func (c *CronJobScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (common.KubernetesData, error) {

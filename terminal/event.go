@@ -6,6 +6,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/node"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/pv"
@@ -84,15 +85,15 @@ func (el *eventListener) Register() {
 		"/" + pv.PVResourceTypes + "/list":                actions.BuildPVListAction(),
 		"/" + node.NodeResourceTypes + "/list":            actions.BuildNodeListAction(),
 
-		"/" + node.NodeResourceTypes + "/search": actions.BuildNodeListAction(),
+		"/" + node.NodeResourceTypes + "/search": actions.BuildNodeDetailAction(),
 
 		"/" + debugMessageActionTypes + "/collect": actions.BuildCollectDebugMessageAction(),
 	}
 }
 
 func (el *eventListener) Listen() error {
-	el.executeHandler("/"+debugMessageActionTypes+"/collect", nil)
-	el.executeHandler("/"+namespaceActionTypes+"/sync", nil)
+	el.executeHandler("/"+debugMessageActionTypes+"/collect", common.ListScrapperArgs{})
+	el.executeHandler("/"+namespaceActionTypes+"/sync", common.ListScrapperArgs{})
 	for {
 		e := <-ui.PollEvents()
 		switch e.ID {
@@ -101,6 +102,10 @@ func (el *eventListener) Listen() error {
 		case "q":
 			el.cancelFunc()
 			return nil
+		case "b":
+			el.terminalDashBoard.SwitchGrid(component.MainGrid)
+			el.terminalDashBoard.DetailParagraph.Clear()
+			el.terminalDashBoard.RenderDashboard()
 		case "<Tab>":
 			path := "/" + keyboardActionTypes + "/tab"
 			el.executeHandler(path, nil)
@@ -108,10 +113,11 @@ func (el *eventListener) Listen() error {
 			switch el.terminalDashBoard.GetCurrentPanelTypes() {
 			case component.MenuPanel:
 				path := el.terminalDashBoard.Menu.Enter()
-				el.executeHandler(path, nil)
+				el.executeHandler(path, common.ListScrapperArgs{Namespace: el.getCurrentNamespace()})
 			case component.ResourceListPanel:
+				el.terminalDashBoard.SwitchGrid(component.DetailGrid)
 				path := "/" + el.terminalDashBoard.Menu.GetSelectedResourceTypes() + "/search"
-				el.executeHandler(path, actions.DetailActionArgs{
+				el.executeHandler(path, common.DetailScrapperArgs{
 					Namespace: el.terminalDashBoard.NamespaceTab.GetCurrentNamespace(),
 					Name:      el.terminalDashBoard.ResourcePanel.SelectedItem,
 				})
@@ -123,23 +129,36 @@ func (el *eventListener) Listen() error {
 			path := "/" + keyboardActionTypes + "/right"
 			el.executeHandler(path, nil)
 		case "<Up>":
-			path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/up"
-			el.executeHandler(path, nil)
+			switch el.terminalDashBoard.GetCurrentGrid() {
+			case component.MainGrid:
+				path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/up"
+				el.executeHandler(path, nil)
+			case component.DetailGrid:
+				el.terminalDashBoard.DetailParagraph.ScrollUp()
+				el.terminalDashBoard.RenderDashboard()
+			}
+
 		case "<Down>":
-			path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/down"
-			el.executeHandler(path, nil)
+			switch el.terminalDashBoard.GetCurrentGrid() {
+			case component.MainGrid:
+				path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/down"
+				el.executeHandler(path, nil)
+			case component.DetailGrid:
+				el.terminalDashBoard.DetailParagraph.ScrollDown()
+				el.terminalDashBoard.RenderDashboard()
+			}
+
 		}
 	}
 }
 
-func (el *eventListener) executeHandler(path string, args actions.ActionArgs) {
+func (el *eventListener) executeHandler(path string, args common.ScrapperArgs) {
 	if handler, ok := el.pathHandlerMap[path]; ok {
 		go handler(
 			el.ctx,
 			el.terminalDashBoard,
 			el.scrapperManagement,
 			el.debugCollector,
-			el.getCurrentNamespace(),
 			args,
 		)
 		el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, fmt.Sprintf("excute path: %s", path), "eventListener"))

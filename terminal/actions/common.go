@@ -9,18 +9,14 @@ import (
 	"github.com/Masterlu1998/kube-viewer/terminal/component"
 )
 
-type ActionArgs interface{}
-
 type listDataGetter func(common.KubernetesData) (header []string, data [][]string, widths []int, err error)
-type detailDataGetter func(common.KubernetesData) (string, error)
 
 type ActionHandler func(
 	ctx context.Context,
 	tdb *component.TerminalDashBoard,
 	sm *kScrapper.ScrapperManagement,
 	dc *debug.DebugCollector,
-	ns string,
-	args ActionArgs,
+	args common.ScrapperArgs,
 )
 
 func listResourceAction(getter listDataGetter, scrapperTypes string) ActionHandler {
@@ -29,11 +25,10 @@ func listResourceAction(getter listDataGetter, scrapperTypes string) ActionHandl
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
 		sm.StopMainScrapper()
-		err := sm.StartSpecificScrapper(ctx, scrapperTypes, ns)
+		err := sm.StartSpecificScrapper(ctx, scrapperTypes, args)
 		if err != nil {
 			dc.Collect(debug.NewDebugMessage(debug.Error, err.Error(), scrapperTypes))
 			return
@@ -56,25 +51,24 @@ type DetailActionArgs struct {
 	Name      string
 }
 
-func detailResourceAction(getter detailDataGetter, scrapperTypes string) ActionHandler {
+func detailResourceAction(scrapperTypes string) ActionHandler {
 	return func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
 		dc *debug.DebugCollector,
-		ns string,
-		args ActionArgs,
+		args common.ScrapperArgs,
 	) {
-		err := sm.StartSpecificScrapper(ctx, scrapperTypes, ns)
+		err := sm.StartSpecificScrapper(ctx, scrapperTypes, args)
 		if err != nil {
 			dc.Collect(debug.NewDebugMessage(debug.Error, err.Error(), scrapperTypes))
 			return
 		}
 
 		for c := range sm.GetSpecificScrapperCh(scrapperTypes) {
-			yamlData, err := getter(c)
-			if err != nil {
-				dc.Collect(debug.NewDebugMessage(debug.Error, err.Error(), scrapperTypes+"Getter"))
+			yamlData, ok := c.(string)
+			if !ok {
+				dc.Collect(debug.NewDebugMessage(debug.Error, "convert to string failed", scrapperTypes+"Getter"))
 				continue
 			}
 			tdb.DetailParagraph.RefreshData(yamlData)
