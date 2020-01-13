@@ -75,7 +75,7 @@ func getWorkloads(kubernetesClient kubernetes.Interface, kubernetesLister *kube.
 			workloadInfos = append(workloadInfos, sInfo)
 		}
 	case ReplicaSetResourceTypes:
-		replicaSetList, err := kubernetesLister.ReplicaSetsLister.ReplicaSets(namespace).List(labels.Everything())
+		replicaSetList, err := kubernetesLister.ReplicaSetLister.ReplicaSets(namespace).List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}

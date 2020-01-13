@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	StatefulSetScrapperTypes = "StatefulSetScrapper"
-	StatefulSetResourceTypes = "StatefulSet"
+	StatefulSetListScrapperTypes = "StatefulSetScrapper"
+	StatefulSetResourceTypes     = "StatefulSet"
 )
 
 type StatefulSetScrapper struct {
@@ -26,7 +26,7 @@ func NewStatefulSetListScrapper(lister *kube.KubeLister, client *kubernetes.Clie
 }
 
 func (w *StatefulSetScrapper) GetScrapperTypes() string {
-	return StatefulSetScrapperTypes
+	return StatefulSetListScrapperTypes
 }
 
 func (w *StatefulSetScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	ReplicaSetScrapperTypes = "ReplicaSetScrapper"
-	ReplicaSetResourceTypes = "ReplicaSet"
+	ReplicaSetListScrapperTypes = "ReplicaSetScrapper"
+	ReplicaSetResourceTypes     = "ReplicaSet"
 )
 
 type ReplicaSetScrapper struct {
@@ -26,7 +26,7 @@ func NewReplicaSetListScrapper(lister *kube.KubeLister, client *kubernetes.Clien
 }
 
 func (r *ReplicaSetScrapper) GetScrapperTypes() string {
-	return ReplicaSetScrapperTypes
+	return ReplicaSetListScrapperTypes
 }
 
 func (r *ReplicaSetScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

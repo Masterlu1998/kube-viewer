@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	CronJobScrapperTypes = "CronJobScrapper"
-	CronJobResourceTypes = "CronJob"
+	CronJobListScrapperTypes = "CronJobScrapper"
+	CronJobResourceTypes     = "CronJob"
 )
 
 type CronJobScrapper struct {
@@ -26,7 +26,7 @@ func NewCronJobListScrapper(lister *kube.KubeLister, client *kubernetes.Clientse
 }
 
 func (c *CronJobScrapper) GetScrapperTypes() string {
-	return CronJobScrapperTypes
+	return CronJobListScrapperTypes
 }
 
 func (c *CronJobScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

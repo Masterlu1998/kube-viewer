@@ -16,7 +16,7 @@ type KubeLister struct {
 	DeploymentLister  appv1.DeploymentLister
 	DaemonSetLister   appv1.DaemonSetLister
 	StatefulSetLister appv1.StatefulSetLister
-	ReplicaSetsLister appv1.ReplicaSetLister
+	ReplicaSetLister  appv1.ReplicaSetLister
 	CronJobLister     batchv1beta1.CronJobLister
 	JobLister         batchv1.JobLister
 	NamespaceLister   corev1.NamespaceLister
@@ -69,7 +69,7 @@ func NewKubeLister(ctx context.Context, client *kubernetes.Clientset) *KubeListe
 		DeploymentLister:  deployments.Lister(),
 		DaemonSetLister:   daemonSets.Lister(),
 		StatefulSetLister: statefulSets.Lister(),
-		ReplicaSetsLister: replicaSets.Lister(),
+		ReplicaSetLister:  replicaSets.Lister(),
 		CronJobLister:     cronJobs.Lister(),
 		JobLister:         jobs.Lister(),
 		NamespaceLister:   namespaces.Lister(),

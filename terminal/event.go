@@ -87,11 +87,18 @@ func (el *eventListener) Register() {
 		"/" + pv.PVResourceTypes + "/list":                actions.BuildPVListAction(),
 		"/" + node.NodeResourceTypes + "/list":            actions.BuildNodeListAction(),
 
-		"/" + configMap.ConfigMapResourceTypes + "/search": actions.BuildConfigMapDetailAction(),
-		"/" + secret.SecretResourceTypes + "/search":       actions.BuildSecretDetailAction(),
-		"/" + pvc.PVCResourceTypes + "/search":             actions.BuildPVCDetailAction(),
-		"/" + pv.PVResourceTypes + "/search":               actions.BuildPVDetailAction(),
-		"/" + node.NodeResourceTypes + "/search":           actions.BuildNodeDetailAction(),
+		"/" + workload.DeploymentResourceTypes + "/search":  actions.BuildDeploymentDetailAction(),
+		"/" + workload.StatefulSetResourceTypes + "/search": actions.BuildStatefulSetDetailAction(),
+		"/" + workload.DaemonSetResourceTypes + "/search":   actions.BuildDaemonSetDetailAction(),
+		"/" + workload.ReplicaSetResourceTypes + "/search":  actions.BuildReplicaSetDetailAction(),
+		"/" + workload.CronJobResourceTypes + "/search":     actions.BuildCronJobDetailAction(),
+		"/" + workload.JobResourceTypes + "/search":         actions.BuildJobDetailAction(),
+		"/" + service.ServiceResourceTypes + "/search":      actions.BuildServiceDetailAction(),
+		"/" + configMap.ConfigMapResourceTypes + "/search":  actions.BuildConfigMapDetailAction(),
+		"/" + secret.SecretResourceTypes + "/search":        actions.BuildSecretDetailAction(),
+		"/" + pvc.PVCResourceTypes + "/search":              actions.BuildPVCDetailAction(),
+		"/" + pv.PVResourceTypes + "/search":                actions.BuildPVDetailAction(),
+		"/" + node.NodeResourceTypes + "/search":            actions.BuildNodeDetailAction(),
 
 		"/" + debugMessageActionTypes + "/collect": actions.BuildCollectDebugMessageAction(),
 	}

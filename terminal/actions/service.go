@@ -32,5 +32,9 @@ func serviceListDataGetter(c common.KubernetesData) ([]string, [][]string, []int
 }
 
 func BuildServiceListAction() ActionHandler {
-	return listResourceAction(serviceListDataGetter, service.ServiceScrapperTypes)
+	return listResourceAction(serviceListDataGetter, service.ServiceListScrapperTypes)
+}
+
+func BuildServiceDetailAction() ActionHandler {
+	return detailResourceAction(service.ServiceDetailScrapperTypes)
 }

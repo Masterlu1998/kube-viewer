@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	DaemonSetScrapperTypes = "DaemonSetScrapper"
-	DaemonSetResourceTypes = "DaemonSet"
+	DaemonSetListScrapperTypes = "DaemonSetScrapper"
+	DaemonSetResourceTypes     = "DaemonSet"
 )
 
 type DaemonSetScrapper struct {
@@ -26,7 +26,7 @@ func NewDaemonSetListScrapper(lister *kube.KubeLister, client *kubernetes.Client
 }
 
 func (d *DaemonSetScrapper) GetScrapperTypes() string {
-	return DaemonSetScrapperTypes
+	return DaemonSetListScrapperTypes
 }
 
 func (d *DaemonSetScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

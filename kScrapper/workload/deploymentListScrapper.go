@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	DeploymentScrapperTypes = "DeploymentScrapper"
-	DeploymentResourceTypes = "Deployment"
+	DeploymentListScrapperTypes = "DeploymentScrapper"
+	DeploymentResourceTypes     = "Deployment"
 )
 
 type DeploymentScrapper struct {
@@ -26,7 +26,7 @@ func NewDeploymentListScrapper(lister *kube.KubeLister, client *kubernetes.Clien
 }
 
 func (w *DeploymentScrapper) GetScrapperTypes() string {
-	return DeploymentScrapperTypes
+	return DeploymentListScrapperTypes
 }
 
 func (w *DeploymentScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

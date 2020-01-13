@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	ServiceScrapperTypes = "ServiceScrapper"
-	ServiceResourceTypes = "Namespace"
+	ServiceListScrapperTypes = "ServiceScrapper"
+	ServiceResourceTypes     = "Namespace"
 )
 
 type ServiceScrapper struct {
@@ -29,7 +29,7 @@ func NewNServiceListScrapper(lister *kube.KubeLister, client *kubernetes.Clients
 }
 
 func (w *ServiceScrapper) GetScrapperTypes() string {
-	return ServiceScrapperTypes
+	return ServiceListScrapperTypes
 }
 
 func (w *ServiceScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

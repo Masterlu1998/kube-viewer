@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	JobScrapperTypes = "JobScrapper"
-	JobResourceTypes = "Job"
+	JobListScrapperTypes = "JobScrapper"
+	JobResourceTypes     = "Job"
 )
 
 type JobScrapper struct {
@@ -26,7 +26,7 @@ func NewJobListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, d
 }
 
 func (j *JobScrapper) GetScrapperTypes() string {
-	return JobScrapperTypes
+	return JobListScrapperTypes
 }
 
 func (j *JobScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {
