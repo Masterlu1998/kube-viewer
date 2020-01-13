@@ -19,7 +19,7 @@ type DeploymentScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewDeploymentScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *DeploymentScrapper {
+func NewDeploymentListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *DeploymentScrapper {
 	return &DeploymentScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}

@@ -19,7 +19,7 @@ type StatefulSetScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewStatefulSetScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *StatefulSetScrapper {
+func NewStatefulSetListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *StatefulSetScrapper {
 	return &StatefulSetScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}

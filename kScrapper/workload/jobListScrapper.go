@@ -19,7 +19,7 @@ type JobScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewJobScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *JobScrapper {
+func NewJobListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *JobScrapper {
 	return &JobScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}

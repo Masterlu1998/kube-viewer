@@ -19,7 +19,7 @@ type CronJobScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewCronJobScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *CronJobScrapper {
+func NewCronJobListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *CronJobScrapper {
 	return &CronJobScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}

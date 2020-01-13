@@ -30,5 +30,9 @@ func secretListDataGetter(c common.KubernetesData) ([]string, [][]string, []int,
 }
 
 func BuildSecretListAction() ActionHandler {
-	return listResourceAction(secretListDataGetter, secret.SecretScrapperTypes)
+	return listResourceAction(secretListDataGetter, secret.SecretListScrapperTypes)
+}
+
+func BuildSecretDetailAction() ActionHandler {
+	return detailResourceAction(secret.SecretDetailScrapperTypes)
 }

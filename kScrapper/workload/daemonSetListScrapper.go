@@ -19,7 +19,7 @@ type DaemonSetScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewDaemonSetScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *DaemonSetScrapper {
+func NewDaemonSetListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *DaemonSetScrapper {
 	return &DaemonSetScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}

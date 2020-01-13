@@ -19,7 +19,7 @@ type ReplicaSetScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewReplicaSetScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *ReplicaSetScrapper {
+func NewReplicaSetListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *ReplicaSetScrapper {
 	return &ReplicaSetScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}

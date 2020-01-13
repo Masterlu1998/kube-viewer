@@ -14,15 +14,15 @@ import (
 )
 
 const (
-	SecretScrapperTypes = "SecretScrapper"
-	SecretResourceTypes = "Secret"
+	SecretListScrapperTypes = "SecretScrapper"
+	SecretResourceTypes     = "Secret"
 )
 
 type SecretScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewSecretScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *SecretScrapper {
+func NewSecretListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *SecretScrapper {
 
 	return &SecretScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
@@ -30,7 +30,7 @@ func NewSecretScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc
 }
 
 func (w *SecretScrapper) GetScrapperTypes() string {
-	return SecretScrapperTypes
+	return SecretListScrapperTypes
 }
 
 func (w *SecretScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

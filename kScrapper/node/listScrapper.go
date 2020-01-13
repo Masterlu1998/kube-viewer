@@ -25,7 +25,7 @@ type NodeListScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewNodeScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *NodeListScrapper {
+func NewNodeListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *NodeListScrapper {
 	return &NodeListScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}

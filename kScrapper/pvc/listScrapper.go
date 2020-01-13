@@ -15,22 +15,22 @@ import (
 )
 
 const (
-	PVCScrapperTypes = "PVCScrapper"
-	PVCResourceTypes = "PVC"
+	PVCListScrapperTypes = "PVCScrapper"
+	PVCResourceTypes     = "PVC"
 )
 
 type PVCScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewPVCScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *PVCScrapper {
+func NewPVCListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *PVCScrapper {
 	return &PVCScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}
 }
 
 func (w *PVCScrapper) GetScrapperTypes() string {
-	return PVCScrapperTypes
+	return PVCListScrapperTypes
 }
 
 func (w *PVCScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

@@ -22,7 +22,7 @@ type ConfigMapScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewConfigMapScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *ConfigMapScrapper {
+func NewConfigMapListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *ConfigMapScrapper {
 	return &ConfigMapScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}

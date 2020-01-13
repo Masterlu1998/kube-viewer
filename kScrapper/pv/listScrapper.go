@@ -22,7 +22,7 @@ type PVScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewPVScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *PVScrapper {
+func NewPVListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *PVScrapper {
 	return &PVScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}

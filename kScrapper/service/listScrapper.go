@@ -22,7 +22,7 @@ type ServiceScrapper struct {
 	*common.CommonScrapper
 }
 
-func NewNamespaceScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *ServiceScrapper {
+func NewNServiceListScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *debug.DebugCollector) *ServiceScrapper {
 	return &ServiceScrapper{
 		CommonScrapper: common.NewCommonScrapper(dc, client, lister),
 	}
