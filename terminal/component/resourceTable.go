@@ -212,8 +212,8 @@ func (rp *resourcePanel) selectedToggle() {
 	}
 }
 
-func (rp *resourcePanel) GetSelectedUniqueRow() string {
-	return rp.SelectedItem
+func (rp *resourcePanel) GetSelectedUniqueRowNamespaceAndName() (string, string) {
+	return rp.Rows[rp.SelectedRow][1], rp.SelectedItem
 }
 
 func (rp *resourcePanel) Reset() {

@@ -15,10 +15,9 @@ import (
 )
 
 const (
-	NodeListScrapperTypes   = "NodeListScrapper"
-	NodeDetailScrapperTypes = "NodeDetailScrapper"
-	NodeResourceTypes       = "Node"
-	masterRoleSpecialLabel  = "node-role.kubernetes.io/master"
+	NodeListScrapperTypes  = "NodeListScrapper"
+	NodeResourceTypes      = "Node"
+	masterRoleSpecialLabel = "node-role.kubernetes.io/master"
 )
 
 // Node list scrapper

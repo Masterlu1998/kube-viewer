@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	ConfigMapScrapperTypes = "ConfigMapScrapper"
-	ConfigMapResourceTypes = "ConfigMap"
+	ConfigListMapScrapperTypes = "ConfigMapScrapper"
+	ConfigMapResourceTypes     = "ConfigMap"
 )
 
 type ConfigMapScrapper struct {
@@ -29,7 +29,7 @@ func NewConfigMapScrapper(lister *kube.KubeLister, client *kubernetes.Clientset,
 }
 
 func (w *ConfigMapScrapper) GetScrapperTypes() string {
-	return ConfigMapScrapperTypes
+	return ConfigListMapScrapperTypes
 }
 
 func (w *ConfigMapScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

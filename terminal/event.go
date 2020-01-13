@@ -62,14 +62,16 @@ func newEventListener(ctx context.Context, tdb *component.TerminalDashBoard, can
 
 func (el *eventListener) Register() {
 	el.pathHandlerMap = map[string]actions.ActionHandler{
-		"/" + keyboardActionTypes + "/left":                                             actions.BuildLeftKeyboardAction(),
-		"/" + keyboardActionTypes + "/right":                                            actions.BuildRightKeyboardAction(),
-		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/up":           actions.BuildUpMenuKeyboardAction(),
-		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/down":         actions.BuildDownMenuKeyboardAction(),
-		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/up":   actions.BuildUpResourceListKeyboardAction(),
-		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/down": actions.BuildDownResourceListKeyboardAction(),
-		// "/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/enter": el.enterResourceListKeyboardAction,
-		"/" + keyboardActionTypes + "/tab": actions.BuildTabKeyboardAction(),
+		"/" + keyboardActionTypes + "/left":                                                actions.BuildLeftKeyboardAction(),
+		"/" + keyboardActionTypes + "/right":                                               actions.BuildRightKeyboardAction(),
+		"/" + keyboardActionTypes + "/back":                                                actions.BuildBackKeyboardAction(),
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/up":              actions.BuildUpMenuKeyboardAction(),
+		"/" + string(component.MenuPanel) + "/" + keyboardActionTypes + "/down":            actions.BuildDownMenuKeyboardAction(),
+		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/up":      actions.BuildUpResourceListKeyboardAction(),
+		"/" + string(component.ResourceListPanel) + "/" + keyboardActionTypes + "/down":    actions.BuildDownResourceListKeyboardAction(),
+		"/" + string(component.DetailParagraphPanel) + "/" + keyboardActionTypes + "/up":   actions.BuildUpDetailKeyboardAction(),
+		"/" + string(component.DetailParagraphPanel) + "/" + keyboardActionTypes + "/down": actions.BuildDownDetailKeyboard(),
+		"/" + keyboardActionTypes + "/tab":                                                 actions.BuildTabKeyboardAction(),
 
 		"/" + namespaceActionTypes + "/sync":              actions.BuildSyncNamespaceAction(),
 		"/" + workload.DeploymentResourceTypes + "/list":  actions.BuildDeploymentListAction(),
@@ -85,7 +87,8 @@ func (el *eventListener) Register() {
 		"/" + pv.PVResourceTypes + "/list":                actions.BuildPVListAction(),
 		"/" + node.NodeResourceTypes + "/list":            actions.BuildNodeListAction(),
 
-		"/" + node.NodeResourceTypes + "/search": actions.BuildNodeDetailAction(),
+		"/" + configMap.ConfigMapResourceTypes + "/search": actions.BuildConfigMapDetailAction(),
+		"/" + node.NodeResourceTypes + "/search":           actions.BuildNodeDetailAction(),
 
 		"/" + debugMessageActionTypes + "/collect": actions.BuildCollectDebugMessageAction(),
 	}
@@ -103,25 +106,30 @@ func (el *eventListener) Listen() error {
 			el.cancelFunc()
 			return nil
 		case "b":
-			el.terminalDashBoard.SwitchGrid(component.MainGrid)
-			el.terminalDashBoard.DetailParagraph.Clear()
-			el.terminalDashBoard.RenderDashboard()
+			path := "/" + keyboardActionTypes + "/back"
+			el.executeHandler(path, nil)
 		case "<Tab>":
 			path := "/" + keyboardActionTypes + "/tab"
 			el.executeHandler(path, nil)
 		case "<Enter>":
+			var (
+				path string
+				args common.ScrapperArgs
+			)
 			switch el.terminalDashBoard.GetCurrentPanelTypes() {
 			case component.MenuPanel:
-				path := el.terminalDashBoard.Menu.Enter()
-				el.executeHandler(path, common.ListScrapperArgs{Namespace: el.getCurrentNamespace()})
+				path = el.terminalDashBoard.Menu.Enter()
+				args = common.ListScrapperArgs{Namespace: el.getCurrentNamespace()}
 			case component.ResourceListPanel:
 				el.terminalDashBoard.SwitchGrid(component.DetailGrid)
-				path := "/" + el.terminalDashBoard.Menu.GetSelectedResourceTypes() + "/search"
-				el.executeHandler(path, common.DetailScrapperArgs{
-					Namespace: el.terminalDashBoard.NamespaceTab.GetCurrentNamespace(),
-					Name:      el.terminalDashBoard.ResourcePanel.SelectedItem,
-				})
+				path = "/" + el.terminalDashBoard.Menu.GetSelectedResourceTypes() + "/search"
+				ns, name := el.terminalDashBoard.ResourcePanel.GetSelectedUniqueRowNamespaceAndName()
+				args = common.DetailScrapperArgs{
+					Namespace: ns,
+					Name:      name,
+				}
 			}
+			el.executeHandler(path, args)
 		case "<Left>":
 			path := "/" + keyboardActionTypes + "/left"
 			el.executeHandler(path, nil)
@@ -129,25 +137,23 @@ func (el *eventListener) Listen() error {
 			path := "/" + keyboardActionTypes + "/right"
 			el.executeHandler(path, nil)
 		case "<Up>":
+			var path string
 			switch el.terminalDashBoard.GetCurrentGrid() {
 			case component.MainGrid:
-				path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/up"
-				el.executeHandler(path, nil)
+				path = "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/up"
 			case component.DetailGrid:
-				el.terminalDashBoard.DetailParagraph.ScrollUp()
-				el.terminalDashBoard.RenderDashboard()
+				path = "/" + string(component.DetailParagraphPanel) + "/" + keyboardActionTypes + "/up"
 			}
-
+			el.executeHandler(path, nil)
 		case "<Down>":
+			var path string
 			switch el.terminalDashBoard.GetCurrentGrid() {
 			case component.MainGrid:
-				path := "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/down"
-				el.executeHandler(path, nil)
+				path = "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/down"
 			case component.DetailGrid:
-				el.terminalDashBoard.DetailParagraph.ScrollDown()
-				el.terminalDashBoard.RenderDashboard()
+				path = "/" + string(component.DetailParagraphPanel) + "/" + keyboardActionTypes + "/down"
 			}
-
+			el.executeHandler(path, nil)
 		}
 	}
 }

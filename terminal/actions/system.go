@@ -62,6 +62,32 @@ func BuildDownMenuKeyboardAction() ActionHandler {
 	}
 }
 
+func BuildUpDetailKeyboardAction() ActionHandler {
+	return func(
+		ctx context.Context,
+		tdb *component.TerminalDashBoard,
+		sm *kScrapper.ScrapperManagement,
+		dc *debug.DebugCollector,
+		args common.ScrapperArgs,
+	) {
+		tdb.DetailParagraph.ScrollUp()
+		tdb.RenderDashboard()
+	}
+}
+
+func BuildDownDetailKeyboard() ActionHandler {
+	return func(
+		ctx context.Context,
+		tdb *component.TerminalDashBoard,
+		sm *kScrapper.ScrapperManagement,
+		dc *debug.DebugCollector,
+		args common.ScrapperArgs,
+	) {
+		tdb.DetailParagraph.ScrollDown()
+		tdb.RenderDashboard()
+	}
+}
+
 func BuildLeftKeyboardAction() ActionHandler {
 	return func(
 		ctx context.Context,
@@ -100,6 +126,21 @@ func BuildTabKeyboardAction() ActionHandler {
 	) {
 		tdb.SwitchNextPanel()
 		tdb.ResourcePanel.Reset()
+		tdb.RenderDashboard()
+	}
+}
+
+func BuildBackKeyboardAction() ActionHandler {
+	return func(
+		ctx context.Context,
+		tdb *component.TerminalDashBoard,
+		sm *kScrapper.ScrapperManagement,
+		dc *debug.DebugCollector,
+		args common.ScrapperArgs,
+	) {
+		tdb.SwitchGrid(component.MainGrid)
+		sm.StopMainScrapper()
+		tdb.DetailParagraph.Clear()
 		tdb.RenderDashboard()
 	}
 }

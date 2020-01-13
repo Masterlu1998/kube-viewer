@@ -31,5 +31,9 @@ func configMapListDataGetter(c common.KubernetesData) ([]string, [][]string, []i
 }
 
 func BuildConfigMapListAction() ActionHandler {
-	return listResourceAction(configMapListDataGetter, configMap.ConfigMapScrapperTypes)
+	return listResourceAction(configMapListDataGetter, configMap.ConfigListMapScrapperTypes)
+}
+
+func BuildConfigMapDetailAction() ActionHandler {
+	return detailResourceAction(configMap.ConfigMapDetailScrapperTypes)
 }

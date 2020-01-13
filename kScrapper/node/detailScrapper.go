@@ -10,6 +10,10 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+const (
+	NodeDetailScrapperTypes = "NodeDetailScrapper"
+)
+
 // Node detail scrapper
 type NodeDetailScrapper struct {
 	*common.CommonScrapper

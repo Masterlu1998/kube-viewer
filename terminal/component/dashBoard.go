@@ -19,8 +19,9 @@ var (
 type PanelTypes string
 
 const (
-	MenuPanel         PanelTypes = "menu"
-	ResourceListPanel PanelTypes = "resourceList"
+	MenuPanel            PanelTypes = "menu"
+	ResourceListPanel    PanelTypes = "resourceList"
+	DetailParagraphPanel PanelTypes = "detailParagraph"
 )
 
 type GridTypes int

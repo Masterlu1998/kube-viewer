@@ -33,6 +33,8 @@ func (r *resourceDetailPanel) RefreshData(data string) {
 }
 
 func (r *resourceDetailPanel) Clear() {
-	r.Rows = []string{""}
-	r.SelectedRow = 0
+	p := widgets.NewList()
+	p.Title = "Detail"
+	p.SelectedRowStyle = ui.NewStyle(ui.ColorYellow)
+	r.List = p
 }
