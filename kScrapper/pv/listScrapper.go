@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	PVScrapperTypes = "PVScrapper"
-	PVResourceTypes = "PV"
+	PVListScrapperTypes = "PVScrapper"
+	PVResourceTypes     = "PV"
 )
 
 type PVScrapper struct {
@@ -29,7 +29,7 @@ func NewPVScrapper(lister *kube.KubeLister, client *kubernetes.Clientset, dc *de
 }
 
 func (w *PVScrapper) GetScrapperTypes() string {
-	return PVScrapperTypes
+	return PVListScrapperTypes
 }
 
 func (w *PVScrapper) StartScrapper(ctx context.Context, args common.ScrapperArgs) {

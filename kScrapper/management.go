@@ -40,7 +40,8 @@ var mainScrapperTypes = []string{
 	configMap.ConfigMapDetailScrapperTypes,
 	secret.SecretScrapperTypes,
 	pvc.PVCScrapperTypes,
-	pv.PVScrapperTypes,
+	pv.PVListScrapperTypes,
+	pv.PVDetailScrapperTypes,
 	node.NodeListScrapperTypes,
 	node.NodeDetailScrapperTypes,
 }
@@ -65,10 +66,11 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 		configMap.ConfigListMapScrapperTypes: configMap.NewConfigMapScrapper(kubeLister, kubeClient, collector),
 		secret.SecretScrapperTypes:           secret.NewSecretScrapper(kubeLister, kubeClient, collector),
 		pvc.PVCScrapperTypes:                 pvc.NewPVCScrapper(kubeLister, kubeClient, collector),
-		pv.PVScrapperTypes:                   pv.NewPVScrapper(kubeLister, kubeClient, collector),
+		pv.PVListScrapperTypes:               pv.NewPVScrapper(kubeLister, kubeClient, collector),
 		node.NodeListScrapperTypes:           node.NewNodeScrapper(kubeLister, kubeClient, collector),
 
 		configMap.ConfigMapDetailScrapperTypes: configMap.NewConfigMapDetailScrapper(kubeLister, kubeClient, collector),
+		pv.PVDetailScrapperTypes:               pv.NewPVDetailScrapper(kubeLister, kubeClient, collector),
 		node.NodeDetailScrapperTypes:           node.NewNodeDetailScrapper(kubeLister, kubeClient, collector),
 
 		namespace.NamespaceScrapperTypes: namespace.NewNamespaceScrapper(kubeLister, kubeClient, collector),

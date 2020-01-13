@@ -34,5 +34,9 @@ func pvListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, err
 }
 
 func BuildPVListAction() ActionHandler {
-	return listResourceAction(pvListDataGetter, pv.PVScrapperTypes)
+	return listResourceAction(pvListDataGetter, pv.PVListScrapperTypes)
+}
+
+func BuildPVDetailAction() ActionHandler {
+	return detailResourceAction(pv.PVDetailScrapperTypes)
 }

@@ -88,6 +88,7 @@ func (el *eventListener) Register() {
 		"/" + node.NodeResourceTypes + "/list":            actions.BuildNodeListAction(),
 
 		"/" + configMap.ConfigMapResourceTypes + "/search": actions.BuildConfigMapDetailAction(),
+		"/" + pv.PVResourceTypes + "/search":               actions.BuildPVDetailAction(),
 		"/" + node.NodeResourceTypes + "/search":           actions.BuildNodeDetailAction(),
 
 		"/" + debugMessageActionTypes + "/collect": actions.BuildCollectDebugMessageAction(),
