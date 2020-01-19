@@ -122,18 +122,6 @@ func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrappe
 	return errors.New("no this scrapper type")
 }
 
-// TODO: maybe useless
-func (sm *ScrapperManagement) StopSpecificScrapper(scrapperType string) {
-	sm.rwMutex.Lock()
-	defer sm.rwMutex.Unlock()
-	if !sm.activeScrapperMap[scrapperType] {
-		return
-	}
-
-	sm.scrapperMap[scrapperType].StopScrapper()
-	delete(sm.activeScrapperMap, scrapperType)
-}
-
 func (sm *ScrapperManagement) StopMainScrapper() {
 	sm.rwMutex.Lock()
 	defer sm.rwMutex.Unlock()
