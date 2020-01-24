@@ -27,34 +27,6 @@ type Scrapper interface {
 	StopScrapper()
 }
 
-// TODO: maybe just namespaces scrapper don't need to stop
-var mainScrapperTypes = []string{
-	workload.DeploymentListScrapperTypes,
-	workload.DeploymentDetailScrapperTypes,
-	workload.StatefulSetListScrapperTypes,
-	workload.StatefulSetDetailScrapperTypes,
-	workload.DaemonSetListScrapperTypes,
-	workload.DaemonSetDetailScrapperTypes,
-	workload.ReplicaSetListScrapperTypes,
-	workload.ReplicaSetDetailScrapperTypes,
-	workload.CronJobListScrapperTypes,
-	workload.CronJobDetailScrapperTypes,
-	workload.JobListScrapperTypes,
-	workload.JobDetailScrapperTypes,
-	service.ServiceListScrapperTypes,
-	service.ServiceDetailScrapperTypes,
-	configMap.ConfigListMapScrapperTypes,
-	configMap.ConfigMapDetailScrapperTypes,
-	secret.SecretListScrapperTypes,
-	secret.SecretDetailScrapperTypes,
-	pvc.PVCListScrapperTypes,
-	pvc.PVCDetailScrapperTypes,
-	pv.PVListScrapperTypes,
-	pv.PVDetailScrapperTypes,
-	node.NodeListScrapperTypes,
-	node.NodeDetailScrapperTypes,
-}
-
 func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector) (*ScrapperManagement, error) {
 	kubeClient, err := kube.GetKubernetesClient()
 	if err != nil {
@@ -103,7 +75,7 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 }
 
 type ScrapperManagement struct {
-	rwMutex           sync.RWMutex
+	mutex             sync.Mutex
 	scrapperMap       map[string]Scrapper
 	activeScrapperMap map[string]bool
 	namespace         string
@@ -111,8 +83,8 @@ type ScrapperManagement struct {
 }
 
 func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrapperType string, args common.ScrapperArgs) error {
-	sm.rwMutex.Lock()
-	defer sm.rwMutex.Unlock()
+	sm.mutex.Lock()
+	defer sm.mutex.Unlock()
 	if s, ok := sm.scrapperMap[scrapperType]; ok {
 		s.StartScrapper(ctx, args)
 		sm.activeScrapperMap[scrapperType] = true
@@ -123,15 +95,17 @@ func (sm *ScrapperManagement) StartSpecificScrapper(ctx context.Context, scrappe
 }
 
 func (sm *ScrapperManagement) StopMainScrapper() {
-	sm.rwMutex.Lock()
-	defer sm.rwMutex.Unlock()
+	sm.mutex.Lock()
+	defer sm.mutex.Unlock()
 
-	for _, workloadScrapper := range mainScrapperTypes {
-		if sm.activeScrapperMap[workloadScrapper] {
-			sm.debugCollector.Collect(debug.NewDebugMessage(debug.Info, fmt.Sprintf("stop %s", workloadScrapper), "scrapperManagement"))
-			sm.scrapperMap[workloadScrapper].StopScrapper()
-			delete(sm.activeScrapperMap, workloadScrapper)
+	for scrapper := range sm.activeScrapperMap {
+		if scrapper == namespace.NamespaceScrapperTypes {
+			continue
 		}
+
+		sm.debugCollector.Collect(debug.NewDebugMessage(debug.Info, fmt.Sprintf("stop %s", scrapper), "ScrapperManagement"))
+		sm.scrapperMap[scrapper].StopScrapper()
+		delete(sm.activeScrapperMap, scrapper)
 	}
 }
 
@@ -140,8 +114,8 @@ func (sm *ScrapperManagement) GetSpecificScrapperCh(scrapperType string) <-chan 
 }
 
 func (sm *ScrapperManagement) ResetNamespace(ns string) {
-	sm.rwMutex.RLock()
-	defer sm.rwMutex.RUnlock()
+	sm.mutex.Lock()
+	defer sm.mutex.Unlock()
 	for st := range sm.activeScrapperMap {
 		// no need for namespace scrapper
 		if st == namespace.NamespaceScrapperTypes {
