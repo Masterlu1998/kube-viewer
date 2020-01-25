@@ -26,7 +26,7 @@ func buildSideMenu() *sideMenu {
 
 	items := []*widgets.TreeNode{
 		{
-			Value: newMenuItem("Overview", "", ""),
+			Value: newMenuItem("Overview", "/overview/show", ""),
 			Nodes: nil,
 		},
 		{

@@ -9,6 +9,7 @@ import (
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
+	"github.com/Masterlu1998/kube-viewer/kScrapper/metrics"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/node"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/pv"
@@ -29,6 +30,11 @@ type Scrapper interface {
 
 func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector) (*ScrapperManagement, error) {
 	kubeClient, err := kube.GetKubernetesClient()
+	if err != nil {
+		return nil, err
+	}
+
+	kubeDynamicClient, err := kube.GetKubernetesDynamicClient()
 	if err != nil {
 		return nil, err
 	}
@@ -62,6 +68,8 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 		pvc.PVCDetailScrapperTypes:              pvc.NewPVCDetailScrapper(kubeLister, kubeClient, collector),
 		pv.PVDetailScrapperTypes:                pv.NewPVDetailScrapper(kubeLister, kubeClient, collector),
 		node.NodeDetailScrapperTypes:            node.NewNodeDetailScrapper(kubeLister, kubeClient, collector),
+
+		metrics.NodeMetricsListScrapperTypes: metrics.NewNodeMetricsListScrapper(kubeLister, kubeClient, kubeDynamicClient, collector),
 
 		namespace.NamespaceScrapperTypes: namespace.NewNamespaceScrapper(kubeLister, kubeClient, collector),
 	}

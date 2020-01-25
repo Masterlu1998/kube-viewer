@@ -16,8 +16,9 @@ type DataSourceFunc func(args ScrapperArgs) (KubernetesData, error)
 
 func NewCommonScrapper(dc *debug.DebugCollector, client kubernetes.Interface, lister *kube.KubeLister) *CommonScrapper {
 	return &CommonScrapper{
-		namespace:        "",
-		debugCollector:   dc,
+		namespace:      "",
+		debugCollector: dc,
+		// TODO: useless, need to remove
 		KubernetesClient: client,
 		KubernetesLister: lister,
 	}

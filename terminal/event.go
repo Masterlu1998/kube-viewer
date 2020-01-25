@@ -73,6 +73,8 @@ func (el *eventListener) Register() {
 		"/" + string(component.DetailParagraphPanel) + "/" + keyboardActionTypes + "/down": actions.BuildDownDetailKeyboard(),
 		"/" + keyboardActionTypes + "/tab":                                                 actions.BuildTabKeyboardAction(),
 
+		"/overview/show": actions.BuildOverviewAction(),
+
 		"/" + namespaceActionTypes + "/sync":              actions.BuildSyncNamespaceAction(),
 		"/" + workload.DeploymentResourceTypes + "/list":  actions.BuildDeploymentListAction(),
 		"/" + workload.StatefulSetResourceTypes + "/list": actions.BuildStatefulSetListAction(),
@@ -149,6 +151,8 @@ func (el *eventListener) Listen() error {
 		case "<Up>":
 			var path string
 			switch el.terminalDashBoard.GetCurrentGrid() {
+			case component.OverviewGrid:
+				fallthrough
 			case component.MainGrid:
 				path = "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/up"
 			case component.DetailGrid:
@@ -158,6 +162,8 @@ func (el *eventListener) Listen() error {
 		case "<Down>":
 			var path string
 			switch el.terminalDashBoard.GetCurrentGrid() {
+			case component.OverviewGrid:
+				fallthrough
 			case component.MainGrid:
 				path = "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/down"
 			case component.DetailGrid:

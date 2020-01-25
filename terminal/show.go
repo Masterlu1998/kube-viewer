@@ -17,6 +17,7 @@ func Run(ctx context.Context, cancel context.CancelFunc, sm *kScrapper.ScrapperM
 	defer ui.Close()
 
 	tdb := component.InitDashBoard()
+	tdb.SwitchGrid(component.OverviewGrid)
 
 	eventListener := newEventListener(ctx, tdb, cancel, sm, dc)
 
