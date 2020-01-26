@@ -44,7 +44,10 @@ func (c *CommonScrapper) SetNamespace(ns string) {
 }
 
 func (c *CommonScrapper) ScrapeDataIntoChWithSource(ctx context.Context, f DataSourceFunc, args ScrapperArgs) {
-	c.SetNamespace(args.GetNamespaceField())
+	if args != nil {
+		c.SetNamespace(args.GetNamespaceField())
+	}
+
 	c.initScrapper()
 
 	go func(ctx context.Context, stop chan bool, f DataSourceFunc) {

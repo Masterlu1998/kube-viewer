@@ -43,15 +43,15 @@ const selectedPanelColor = ui.ColorYellow
 
 type TerminalDashBoard struct {
 	*ui.Grid
-	Menu             *sideMenu
-	NamespaceTab     *namespaceTab
-	Console          *debugConsole
-	ResourcePanel    *resourcePanel
-	DetailParagraph  *resourceDetailPanel
-	CPUUsageBarChart *cpuUsageBarChart
-	MemoryBarChart   *memoryUsageBarChart
-	selectedPanel    *panelNode
-	currentGridTypes GridTypes
+	Menu                *sideMenu
+	NamespaceTab        *namespaceTab
+	Console             *debugConsole
+	ResourcePanel       *resourcePanel
+	DetailParagraph     *resourceDetailPanel
+	CPUUsageBarChart    *cpuUsageBarChart
+	MemoryUsageBarChart *memoryUsageBarChart
+	selectedPanel       *panelNode
+	currentGridTypes    GridTypes
 }
 
 func InitDashBoard() *TerminalDashBoard {
@@ -79,14 +79,14 @@ func InitDashBoard() *TerminalDashBoard {
 	headPanelNode := initPanelLinkedList()
 
 	return &TerminalDashBoard{
-		ResourcePanel:    rTable,
-		Menu:             menu,
-		NamespaceTab:     nTab,
-		Console:          console,
-		DetailParagraph:  dParagraph,
-		CPUUsageBarChart: cpuBarChart,
-		MemoryBarChart:   memoryBarChart,
-		selectedPanel:    headPanelNode,
+		ResourcePanel:       rTable,
+		Menu:                menu,
+		NamespaceTab:        nTab,
+		Console:             console,
+		DetailParagraph:     dParagraph,
+		CPUUsageBarChart:    cpuBarChart,
+		MemoryUsageBarChart: memoryBarChart,
+		selectedPanel:       headPanelNode,
 	}
 }
 
@@ -163,9 +163,8 @@ func (t *TerminalDashBoard) buildOverviewGrid() *ui.Grid {
 		ui.NewRow(11.0/12,
 			ui.NewCol(2.0/10, ui.NewRow(1, t.Menu)),
 			ui.NewCol(8.0/10,
-				ui.NewRow(1.0/3, t.CPUUsageBarChart),
-				ui.NewRow(1.0/3, t.MemoryBarChart),
-				ui.NewRow(1.0/3, t.Console),
+				ui.NewRow(1.0/2, t.CPUUsageBarChart),
+				ui.NewRow(1.0/2, t.MemoryUsageBarChart),
 			),
 		),
 	)

@@ -34,6 +34,7 @@ const (
 	keyboardActionTypes     = "keyboard"
 	namespaceActionTypes    = "namespace"
 	debugMessageActionTypes = "debug"
+	overviewActionTypes     = "overview"
 )
 
 type eventListener struct {
@@ -73,7 +74,7 @@ func (el *eventListener) Register() {
 		"/" + string(component.DetailParagraphPanel) + "/" + keyboardActionTypes + "/down": actions.BuildDownDetailKeyboard(),
 		"/" + keyboardActionTypes + "/tab":                                                 actions.BuildTabKeyboardAction(),
 
-		"/overview/show": actions.BuildOverviewAction(),
+		"/" + overviewActionTypes + "/show": actions.BuildOverviewAction(),
 
 		"/" + namespaceActionTypes + "/sync":              actions.BuildSyncNamespaceAction(),
 		"/" + workload.DeploymentResourceTypes + "/list":  actions.BuildDeploymentListAction(),
@@ -107,8 +108,9 @@ func (el *eventListener) Register() {
 }
 
 func (el *eventListener) Listen() error {
-	el.executeHandler("/"+debugMessageActionTypes+"/collect", common.ListScrapperArgs{})
-	el.executeHandler("/"+namespaceActionTypes+"/sync", common.ListScrapperArgs{})
+	el.executeHandler("/"+debugMessageActionTypes+"/collect", nil)
+	el.executeHandler("/"+namespaceActionTypes+"/sync", nil)
+	el.executeHandler("/"+overviewActionTypes+"/show", nil)
 	for {
 		e := <-ui.PollEvents()
 		switch e.ID {
@@ -133,7 +135,6 @@ func (el *eventListener) Listen() error {
 				path = el.terminalDashBoard.Menu.Enter()
 				args = common.ListScrapperArgs{Namespace: el.getCurrentNamespace()}
 			case component.ResourceListPanel:
-				el.terminalDashBoard.SwitchGrid(component.DetailGrid)
 				path = "/" + el.terminalDashBoard.Menu.GetSelectedResourceTypes() + "/search"
 				ns, name := el.terminalDashBoard.ResourcePanel.GetSelectedUniqueRowNamespaceAndName()
 				args = common.DetailScrapperArgs{
