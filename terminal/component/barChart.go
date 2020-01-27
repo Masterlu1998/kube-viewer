@@ -1,6 +1,9 @@
 package component
 
-import "github.com/gizak/termui/v3/widgets"
+import (
+	ui "github.com/gizak/termui/v3"
+	"github.com/gizak/termui/v3/widgets"
+)
 
 type cpuUsageBarChart struct {
 	*widgets.BarChart
@@ -11,7 +14,10 @@ func buildCPUUsageBarChart() *cpuUsageBarChart {
 	cpuBarChart.Title = "CPU Usage"
 	cpuBarChart.Data = []float64{}
 	cpuBarChart.Labels = []string{}
-	cpuBarChart.BarWidth = 12
+	cpuBarChart.BarWidth = 10
+	cpuBarChart.BarColors = []ui.Color{ui.ColorWhite, ui.ColorWhite}
+	cpuBarChart.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorWhite)}
+	cpuBarChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
 	return &cpuUsageBarChart{
 		cpuBarChart,
 	}
@@ -30,7 +36,10 @@ func buildMemoryUsageBarChart() *memoryUsageBarChart {
 	memoryChart := widgets.NewBarChart()
 	memoryChart.Title = "Memory Usage"
 	memoryChart.Data = []float64{}
-	memoryChart.BarWidth = 12
+	memoryChart.BarWidth = 10
+	memoryChart.BarColors = []ui.Color{ui.ColorWhite, ui.ColorWhite}
+	memoryChart.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorWhite)}
+	memoryChart.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
 	return &memoryUsageBarChart{
 		memoryChart,
 	}

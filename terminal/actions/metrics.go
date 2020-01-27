@@ -42,6 +42,7 @@ func BuildOverviewAction() ActionHandler {
 
 				cpuData := make([]float64, 0)
 				memoryData := make([]float64, 0)
+				var totalCPU, usageCPU, totalMemory, usageMemory int64
 				labels := make([]string, 0)
 				for _, item := range nodeMetricList {
 					labels = append(labels, item.Name)
@@ -50,14 +51,20 @@ func BuildOverviewAction() ActionHandler {
 					memoryTotalInt64 := item.MemoryTotal.MilliValue()
 					memoryUsagePercent := float64(memoryUsageInt64) / float64(memoryTotalInt64)
 					memoryData = append(memoryData, math.Trunc(memoryUsagePercent*100))
+					totalMemory += memoryTotalInt64
+					usageMemory += memoryUsageInt64
 
 					cpuUsageInt64 := item.CPUUsage.MilliValue()
 					cpuTotalInt64 := item.CPUTotal.MilliValue()
 					cpuUsagePercent := float64(cpuUsageInt64) / float64(cpuTotalInt64)
 					cpuData = append(cpuData, math.Trunc(cpuUsagePercent*100))
+					totalCPU += cpuTotalInt64
+					usageCPU += cpuUsageInt64
 				}
 				tdb.MemoryUsageBarChart.RefreshDataWithLabel(memoryData, labels)
 				tdb.CPUUsageBarChart.RefreshDataWithLabel(cpuData, labels)
+				tdb.MemoryResourceGauge.RefreshData(int(usageMemory) * 100 / int(totalMemory))
+				tdb.CPUResourceGauge.RefreshData(int(usageCPU) * 100 / int(totalCPU))
 				tdb.RenderDashboard()
 			}
 		}
