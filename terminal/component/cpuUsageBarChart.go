@@ -11,7 +11,7 @@ func buildCPUUsageBarChart() *cpuUsageBarChart {
 	cpuBarChart.Title = "CPU Usage"
 	cpuBarChart.Data = []float64{}
 	cpuBarChart.Labels = []string{}
-	cpuBarChart.BarWidth = 6
+	cpuBarChart.BarWidth = 12
 	return &cpuUsageBarChart{
 		cpuBarChart,
 	}
@@ -30,7 +30,7 @@ func buildMemoryUsageBarChart() *memoryUsageBarChart {
 	memoryChart := widgets.NewBarChart()
 	memoryChart.Title = "Memory Usage"
 	memoryChart.Data = []float64{}
-	memoryChart.BarWidth = 6
+	memoryChart.BarWidth = 12
 	return &memoryUsageBarChart{
 		memoryChart,
 	}

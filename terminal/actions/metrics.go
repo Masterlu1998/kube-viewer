@@ -19,6 +19,7 @@ func BuildOverviewAction() ActionHandler {
 		dc *debug.DebugCollector,
 		args common.ScrapperArgs,
 	) {
+		sm.StopMainScrapper()
 		if tdb.GetCurrentGrid() != component.OverviewGrid {
 			tdb.SwitchGrid(component.OverviewGrid)
 		}

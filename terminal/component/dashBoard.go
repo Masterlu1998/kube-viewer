@@ -1,6 +1,8 @@
 package component
 
 import (
+	"sync"
+
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
 	ui "github.com/gizak/termui/v3"
 )
@@ -42,6 +44,7 @@ var panelIndex = []PanelTypes{MenuPanel, ResourceListPanel}
 const selectedPanelColor = ui.ColorYellow
 
 type TerminalDashBoard struct {
+	mutex sync.Mutex
 	*ui.Grid
 	Menu                *sideMenu
 	NamespaceTab        *namespaceTab
@@ -110,10 +113,14 @@ func (t *TerminalDashBoard) Resize() {
 }
 
 func (t *TerminalDashBoard) RenderDashboard() {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 	ui.Render(t)
 }
 
 func (t *TerminalDashBoard) SwitchGrid(types GridTypes) {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 	switch types {
 	case MainGrid:
 		t.Grid = t.buildMainGrid()

@@ -133,7 +133,9 @@ func (el *eventListener) Listen() error {
 			switch el.terminalDashBoard.GetCurrentPanelTypes() {
 			case component.MenuPanel:
 				path = el.terminalDashBoard.Menu.Enter()
-				args = common.ListScrapperArgs{Namespace: el.getCurrentNamespace()}
+				args = common.ListScrapperArgs{
+					Namespace: el.getCurrentNamespace(),
+				}
 			case component.ResourceListPanel:
 				path = "/" + el.terminalDashBoard.Menu.GetSelectedResourceTypes() + "/search"
 				ns, name := el.terminalDashBoard.ResourcePanel.GetSelectedUniqueRowNamespaceAndName()
