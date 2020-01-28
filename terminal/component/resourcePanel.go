@@ -45,6 +45,7 @@ func BuildResourcePanel() *resourcePanel {
 	rPanel.Header = []string{""}
 	rPanel.Rows = [][]string{{""}}
 	rPanel.ColWidths = []int{0}
+	rPanel.Title = "Resource Panel"
 	return rPanel
 }
 

@@ -43,23 +43,15 @@ func buildSideMenu() *sideMenu {
 		{
 			Value: newMenuItem("Discovery and Load Balancing", "", ""),
 			Nodes: []*widgets.TreeNode{
-				{
-					Value: newMenuItem("Service", "/"+service.ServiceResourceTypes+"/list", service.ServiceResourceTypes),
-				},
+				{Value: newMenuItem("Service", "/"+service.ServiceResourceTypes+"/list", service.ServiceResourceTypes)},
 			},
 		},
 		{
 			Value: newMenuItem("Config and Storage", "", ""),
 			Nodes: []*widgets.TreeNode{
-				{
-					Value: newMenuItem("ConfigMaps", "/"+configMap.ConfigMapResourceTypes+"/list", configMap.ConfigMapResourceTypes),
-				},
-				{
-					Value: newMenuItem("Persistent Volume Claims", "/"+pvc.PVCResourceTypes+"/list", pvc.PVCResourceTypes),
-				},
-				{
-					Value: newMenuItem("Secrets", "/"+secret.SecretResourceTypes+"/list", secret.SecretResourceTypes),
-				},
+				{Value: newMenuItem("ConfigMaps", "/"+configMap.ConfigMapResourceTypes+"/list", configMap.ConfigMapResourceTypes)},
+				{Value: newMenuItem("Persistent Volume Claims", "/"+pvc.PVCResourceTypes+"/list", pvc.PVCResourceTypes)},
+				{Value: newMenuItem("Secrets", "/"+secret.SecretResourceTypes+"/list", secret.SecretResourceTypes)},
 			},
 		},
 	}
@@ -68,6 +60,7 @@ func buildSideMenu() *sideMenu {
 	menu.SetNodes(items)
 	menu.SelectedRowStyle = termui.NewStyle(termui.ColorYellow)
 	menu.ExpandAll()
+	menu.Title = "Menu"
 
 	return &sideMenu{Tree: menu}
 }

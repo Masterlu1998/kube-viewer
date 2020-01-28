@@ -180,6 +180,7 @@ func (t *TerminalDashBoard) buildOverviewGrid() *ui.Grid {
 			ui.NewCol(6.0/12,
 				ui.NewRow(1.0/6, t.CPUResourceGauge),
 				ui.NewRow(1.0/6, t.MemoryResourceGauge),
+				ui.NewRow(4.0/6, t.ResourcePanel),
 			),
 			ui.NewCol(4.0/12,
 				ui.NewRow(1.0/2, t.CPUUsageBarChart),

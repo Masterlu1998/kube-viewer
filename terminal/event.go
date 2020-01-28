@@ -110,7 +110,7 @@ func (el *eventListener) Register() {
 func (el *eventListener) Listen() error {
 	el.executeHandler("/"+debugMessageActionTypes+"/collect", nil)
 	el.executeHandler("/"+namespaceActionTypes+"/sync", nil)
-	el.executeHandler("/"+overviewActionTypes+"/show", nil)
+	el.executeHandler("/"+overviewActionTypes+"/show", common.ListScrapperArgs{Namespace: el.getCurrentNamespace()})
 	for {
 		e := <-ui.PollEvents()
 		switch e.ID {

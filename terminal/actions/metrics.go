@@ -11,6 +11,11 @@ import (
 	"github.com/Masterlu1998/kube-viewer/terminal/component"
 )
 
+var (
+	podTableHeader   = []string{"name", "namespace", "cpu usage", "memory usage"}
+	podTableColWidth = []int{15, 12, 12, 12}
+)
+
 func BuildOverviewAction() ActionHandler {
 	return func(
 		ctx context.Context,
@@ -30,9 +35,28 @@ func BuildOverviewAction() ActionHandler {
 			return
 		}
 
+		err = sm.StartSpecificScrapper(ctx, metrics.PodMetricsListScrapperTypes, args)
+		if err != nil {
+			dc.Collect(debug.NewDebugMessage(debug.Error, err.Error(), metrics.PodMetricsListScrapperTypes))
+			return
+		}
+
 		isOpen := true
 		for isOpen {
 			select {
+			case rawPodMetricList, ok := <-sm.GetSpecificScrapperCh(metrics.PodMetricsListScrapperTypes):
+				if !ok {
+					isOpen = false
+					continue
+				}
+
+				podMetricList := rawPodMetricList.([]*metrics.PodMetricsInfo)
+				data := make([][]string, 0)
+				for _, item := range podMetricList {
+					col := []string{item.Name, item.NameSpace, item.CPUUsage.String(), item.MemoryUsage.String()}
+					data = append(data, col)
+				}
+				tdb.ResourcePanel.RefreshPanelData(podTableHeader, data, podTableColWidth)
 			case rawNodeMetricList, ok := <-sm.GetSpecificScrapperCh(metrics.NodeMetricsListScrapperTypes):
 				if !ok {
 					isOpen = false
@@ -68,6 +92,5 @@ func BuildOverviewAction() ActionHandler {
 				tdb.RenderDashboard()
 			}
 		}
-
 	}
 }

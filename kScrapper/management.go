@@ -70,6 +70,7 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 		node.NodeDetailScrapperTypes:            node.NewNodeDetailScrapper(kubeLister, kubeClient, collector),
 
 		metrics.NodeMetricsListScrapperTypes: metrics.NewNodeMetricsListScrapper(kubeLister, kubeClient, kubeDynamicClient, collector),
+		metrics.PodMetricsListScrapperTypes:  metrics.NewPodMetricsListScrapper(kubeLister, kubeClient, kubeDynamicClient, collector),
 
 		namespace.NamespaceScrapperTypes: namespace.NewNamespaceScrapper(kubeLister, kubeClient, collector),
 	}
