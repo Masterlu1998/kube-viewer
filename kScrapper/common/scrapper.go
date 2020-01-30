@@ -18,7 +18,7 @@ func NewCommonScrapper(dc *debug.DebugCollector, client kubernetes.Interface, li
 	return &CommonScrapper{
 		namespace:      "",
 		debugCollector: dc,
-		// TODO: useless, need to remove
+		// TODO: useless for now
 		KubernetesClient: client,
 		KubernetesLister: lister,
 	}
@@ -26,7 +26,7 @@ func NewCommonScrapper(dc *debug.DebugCollector, client kubernetes.Interface, li
 
 type CommonScrapper struct {
 	stop             chan bool
-	ch               chan KubernetesData
+	dataCh           chan KubernetesData
 	namespace        string
 	debugCollector   *debug.DebugCollector
 	KubernetesClient kubernetes.Interface
@@ -34,7 +34,7 @@ type CommonScrapper struct {
 }
 
 func (c *CommonScrapper) Watch() <-chan KubernetesData {
-	return c.ch
+	return c.dataCh
 }
 
 func (c *CommonScrapper) SetNamespace(ns string) {
@@ -65,7 +65,7 @@ func (c *CommonScrapper) ScrapeDataIntoChWithSource(ctx context.Context, f DataS
 					c.debugCollector.Collect(debug.NewDebugMessage(debug.Error, err.Error(), commonScrapperTypes))
 					continue
 				}
-				c.ch <- data
+				c.dataCh <- data
 			}
 		}
 	}(ctx, c.stop, f)
@@ -73,7 +73,7 @@ func (c *CommonScrapper) ScrapeDataIntoChWithSource(ctx context.Context, f DataS
 
 func (c *CommonScrapper) initScrapper() {
 	c.StopScrapper()
-	c.ch = make(chan KubernetesData)
+	c.dataCh = make(chan KubernetesData)
 	c.stop = make(chan bool)
 }
 
@@ -84,8 +84,8 @@ func (c *CommonScrapper) StopScrapper() {
 	}
 	c.stop = nil
 
-	if c.ch != nil {
-		close(c.ch)
+	if c.dataCh != nil {
+		close(c.dataCh)
 	}
-	c.ch = nil
+	c.dataCh = nil
 }

@@ -129,6 +129,8 @@ func (t *TerminalDashBoard) RenderDashboard() {
 func (t *TerminalDashBoard) SwitchGrid(types GridTypes) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
+	blankHeader, blankData, blankColWidth := []string{}, [][]string{}, []int{}
+	t.ResourcePanel.RefreshPanelData(blankHeader, blankData, blankColWidth)
 	switch types {
 	case MainGrid:
 		t.Grid = t.buildMainGrid()
@@ -177,12 +179,12 @@ func (t *TerminalDashBoard) buildOverviewGrid() *ui.Grid {
 		ui.NewRow(1.0/12, t.NamespaceTab),
 		ui.NewRow(11.0/12,
 			ui.NewCol(2.0/12, ui.NewRow(1, t.Menu)),
-			ui.NewCol(6.0/12,
+			ui.NewCol(7.0/12,
 				ui.NewRow(1.0/6, t.CPUResourceGauge),
 				ui.NewRow(1.0/6, t.MemoryResourceGauge),
 				ui.NewRow(4.0/6, t.ResourcePanel),
 			),
-			ui.NewCol(4.0/12,
+			ui.NewCol(3.0/12,
 				ui.NewRow(1.0/2, t.CPUUsageBarChart),
 				ui.NewRow(1.0/2, t.MemoryUsageBarChart),
 			),
