@@ -120,8 +120,13 @@ func (el *eventListener) Listen() error {
 			el.cancelFunc()
 			return nil
 		case "b":
-			path := "/" + keyboardActionTypes + "/back"
-			el.executeHandler(path, nil)
+			// path := "/" + keyboardActionTypes + "/back"
+			// el.executeHandler(path, nil)
+
+			args := common.ListScrapperArgs{
+				Namespace: el.getCurrentNamespace(),
+			}
+			el.executeHandler(el.terminalDashBoard.Menu.Enter(), args)
 		case "<Tab>":
 			path := "/" + keyboardActionTypes + "/tab"
 			el.executeHandler(path, nil)
