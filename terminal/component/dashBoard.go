@@ -29,9 +29,9 @@ const (
 type GridTypes int
 
 const (
-	MainGrid GridTypes = iota
-	DetailGrid
-	OverviewGrid
+	MainGridTypes GridTypes = iota
+	DetailGridTypes
+	OverviewGridTypes
 )
 
 type panelNode struct {
@@ -42,6 +42,12 @@ type panelNode struct {
 var panelIndex = []PanelTypes{MenuPanel, ResourceListPanel}
 
 const selectedPanelColor = ui.ColorYellow
+
+var (
+	DetailGrid   *ui.Grid
+	OverviewGrid *ui.Grid
+	MainGrid     *ui.Grid
+)
 
 type TerminalDashBoard struct {
 	mutex sync.Mutex
@@ -87,7 +93,7 @@ func InitDashBoard() *TerminalDashBoard {
 	// init selected panel list
 	headPanelNode := initPanelLinkedList()
 
-	return &TerminalDashBoard{
+	tdb := &TerminalDashBoard{
 		ResourcePanel:       rTable,
 		Menu:                menu,
 		NamespaceTab:        nTab,
@@ -99,6 +105,12 @@ func InitDashBoard() *TerminalDashBoard {
 		MemoryResourceGauge: memoryResourceGauge,
 		selectedPanel:       headPanelNode,
 	}
+
+	MainGrid = tdb.buildMainGrid()
+	DetailGrid = tdb.buildDetailGrid()
+	OverviewGrid = tdb.buildOverviewGrid()
+
+	return tdb
 }
 
 func initPanelLinkedList() *panelNode {
@@ -129,18 +141,16 @@ func (t *TerminalDashBoard) RenderDashboard() {
 func (t *TerminalDashBoard) SwitchGrid(types GridTypes) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
-	blankHeader, blankData, blankColWidth := []string{}, [][]string{}, []int{}
-	t.ResourcePanel.RefreshPanelData(blankHeader, blankData, blankColWidth)
 	switch types {
-	case MainGrid:
-		t.Grid = t.buildMainGrid()
-		t.currentGridTypes = MainGrid
-	case DetailGrid:
-		t.Grid = t.buildDetailGrid()
-		t.currentGridTypes = DetailGrid
-	case OverviewGrid:
-		t.Grid = t.buildOverviewGrid()
-		t.currentGridTypes = OverviewGrid
+	case MainGridTypes:
+		t.Grid = MainGrid
+		t.currentGridTypes = MainGridTypes
+	case DetailGridTypes:
+		t.Grid = DetailGrid
+		t.currentGridTypes = DetailGridTypes
+	case OverviewGridTypes:
+		t.Grid = OverviewGrid
+		t.currentGridTypes = OverviewGridTypes
 	}
 }
 

@@ -27,8 +27,8 @@ func listResourceAction(getter listDataGetter, scrapperTypes string) ActionHandl
 		dc *debug.DebugCollector,
 		args common.ScrapperArgs,
 	) {
-		if tdb.GetCurrentGrid() != component.MainGrid {
-			tdb.SwitchGrid(component.MainGrid)
+		if tdb.GetCurrentGrid() != component.MainGridTypes {
+			tdb.SwitchGrid(component.MainGridTypes)
 		}
 
 		sm.StopMainScrapper()
@@ -63,8 +63,8 @@ func detailResourceAction(scrapperTypes string) ActionHandler {
 		dc *debug.DebugCollector,
 		args common.ScrapperArgs,
 	) {
-		if tdb.GetCurrentGrid() != component.DetailGrid {
-			tdb.SwitchGrid(component.DetailGrid)
+		if tdb.GetCurrentGrid() != component.DetailGridTypes {
+			tdb.SwitchGrid(component.DetailGridTypes)
 		}
 
 		err := sm.StartSpecificScrapper(ctx, scrapperTypes, args)

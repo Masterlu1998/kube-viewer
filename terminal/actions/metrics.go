@@ -25,8 +25,8 @@ func BuildOverviewAction() ActionHandler {
 		args common.ScrapperArgs,
 	) {
 		sm.StopMainScrapper()
-		if tdb.GetCurrentGrid() != component.OverviewGrid {
-			tdb.SwitchGrid(component.OverviewGrid)
+		if tdb.GetCurrentGrid() != component.OverviewGridTypes {
+			tdb.SwitchGrid(component.OverviewGridTypes)
 		}
 
 		err := sm.StartSpecificScrapper(ctx, metrics.NodeMetricsListScrapperTypes, args)

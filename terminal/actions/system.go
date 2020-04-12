@@ -138,7 +138,7 @@ func BuildBackKeyboardAction() ActionHandler {
 		dc *debug.DebugCollector,
 		args common.ScrapperArgs,
 	) {
-		tdb.SwitchGrid(component.MainGrid)
+		tdb.SwitchGrid(component.MainGridTypes)
 		sm.StopMainScrapper()
 		tdb.DetailParagraph.Clear()
 		tdb.RenderDashboard()

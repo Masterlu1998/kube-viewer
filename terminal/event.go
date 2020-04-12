@@ -120,13 +120,8 @@ func (el *eventListener) Listen() error {
 			el.cancelFunc()
 			return nil
 		case "b":
-			// path := "/" + keyboardActionTypes + "/back"
-			// el.executeHandler(path, nil)
-
-			args := common.ListScrapperArgs{
-				Namespace: el.getCurrentNamespace(),
-			}
-			el.executeHandler(el.terminalDashBoard.Menu.Enter(), args)
+			path := "/" + keyboardActionTypes + "/back"
+			el.executeHandler(path, nil)
 		case "<Tab>":
 			path := "/" + keyboardActionTypes + "/tab"
 			el.executeHandler(path, nil)
@@ -159,22 +154,22 @@ func (el *eventListener) Listen() error {
 		case "<Up>":
 			var path string
 			switch el.terminalDashBoard.GetCurrentGrid() {
-			case component.OverviewGrid:
+			case component.OverviewGridTypes:
 				fallthrough
-			case component.MainGrid:
+			case component.MainGridTypes:
 				path = "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/up"
-			case component.DetailGrid:
+			case component.DetailGridTypes:
 				path = "/" + string(component.DetailParagraphPanel) + "/" + keyboardActionTypes + "/up"
 			}
 			el.executeHandler(path, nil)
 		case "<Down>":
 			var path string
 			switch el.terminalDashBoard.GetCurrentGrid() {
-			case component.OverviewGrid:
+			case component.OverviewGridTypes:
 				fallthrough
-			case component.MainGrid:
+			case component.MainGridTypes:
 				path = "/" + string(el.getCurrentSelectedPanel()) + "/" + keyboardActionTypes + "/down"
-			case component.DetailGrid:
+			case component.DetailGridTypes:
 				path = "/" + string(component.DetailParagraphPanel) + "/" + keyboardActionTypes + "/down"
 			}
 			el.executeHandler(path, nil)
