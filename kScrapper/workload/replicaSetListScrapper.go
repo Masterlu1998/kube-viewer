@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	ReplicaSetListScrapperTypes = "ReplicaSetScrapper"
+	ReplicaSetListScrapperTypes = "ReplicaSetListScrapper"
 	ReplicaSetResourceTypes     = "ReplicaSet"
 )
 

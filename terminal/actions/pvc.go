@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/pvc"
+	"github.com/Masterlu1998/kube-viewer/terminal/path"
 )
 
 var (
@@ -36,10 +37,10 @@ func pvcListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, er
 	return pvcTableHeader, newPVCTableData, pvcTableColWidth, nil
 }
 
-func BuildPVCListAction() ActionHandler {
-	return listResourceAction(pvcListDataGetter, pvc.PVCListScrapperTypes)
+func BuildPVCListAction(tree *path.TrieTree) {
+	listResourceAction(pvcListDataGetter, tree, pvc.PVCListScrapperTypes)
 }
 
-func BuildPVCDetailAction() ActionHandler {
-	return detailResourceAction(pvc.PVCDetailScrapperTypes)
+func BuildPVCDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, pvc.PVCDetailScrapperTypes)
 }

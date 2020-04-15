@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/workload"
+	"github.com/Masterlu1998/kube-viewer/terminal/path"
 )
 
 var (
@@ -32,50 +33,50 @@ func workloadListDataGetter(c common.KubernetesData) ([]string, [][]string, []in
 	return workloadTableHeader, newWorkloadTableData, workloadTableColWidth, nil
 }
 
-func BuildDeploymentListAction() ActionHandler {
-	return listResourceAction(workloadListDataGetter, workload.DeploymentListScrapperTypes)
+func BuildDeploymentListAction(tree *path.TrieTree) {
+	listResourceAction(workloadListDataGetter, tree, workload.DeploymentListScrapperTypes)
 }
 
-func BuildDeploymentDetailAction() ActionHandler {
-	return detailResourceAction(workload.DeploymentDetailScrapperTypes)
+func BuildDeploymentDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, workload.DeploymentDetailScrapperTypes)
 }
 
-func BuildStatefulSetListAction() ActionHandler {
-	return listResourceAction(workloadListDataGetter, workload.StatefulSetListScrapperTypes)
+func BuildStatefulSetListAction(tree *path.TrieTree) {
+	listResourceAction(workloadListDataGetter, tree, workload.StatefulSetListScrapperTypes)
 }
 
-func BuildStatefulSetDetailAction() ActionHandler {
-	return detailResourceAction(workload.StatefulSetDetailScrapperTypes)
+func BuildStatefulSetDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, workload.StatefulSetDetailScrapperTypes)
 }
 
-func BuildDaemonSetListAction() ActionHandler {
-	return listResourceAction(workloadListDataGetter, workload.DaemonSetListScrapperTypes)
+func BuildDaemonSetListAction(tree *path.TrieTree) {
+	listResourceAction(workloadListDataGetter, tree, workload.DaemonSetListScrapperTypes)
 }
 
-func BuildDaemonSetDetailAction() ActionHandler {
-	return detailResourceAction(workload.DaemonSetDetailScrapperTypes)
+func BuildDaemonSetDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, workload.DaemonSetDetailScrapperTypes)
 }
 
-func BuildReplicaSetListAction() ActionHandler {
-	return listResourceAction(workloadListDataGetter, workload.ReplicaSetListScrapperTypes)
+func BuildReplicaSetListAction(tree *path.TrieTree) {
+	listResourceAction(workloadListDataGetter, tree, workload.ReplicaSetListScrapperTypes)
 }
 
-func BuildReplicaSetDetailAction() ActionHandler {
-	return detailResourceAction(workload.ReplicaSetDetailScrapperTypes)
+func BuildReplicaSetDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, workload.ReplicaSetDetailScrapperTypes)
 }
 
-func BuildJobListAction() ActionHandler {
-	return listResourceAction(workloadListDataGetter, workload.JobListScrapperTypes)
+func BuildJobListAction(tree *path.TrieTree) {
+	listResourceAction(workloadListDataGetter, tree, workload.JobListScrapperTypes)
 }
 
-func BuildJobDetailAction() ActionHandler {
-	return detailResourceAction(workload.JobDetailScrapperTypes)
+func BuildJobDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, workload.JobDetailScrapperTypes)
 }
 
-func BuildCronJobListAction() ActionHandler {
-	return listResourceAction(workloadListDataGetter, workload.CronJobListScrapperTypes)
+func BuildCronJobListAction(tree *path.TrieTree) {
+	listResourceAction(workloadListDataGetter, tree, workload.CronJobListScrapperTypes)
 }
 
-func BuildCronJobDetailAction() ActionHandler {
-	return detailResourceAction(workload.CronJobDetailScrapperTypes)
+func BuildCronJobDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, workload.CronJobDetailScrapperTypes)
 }

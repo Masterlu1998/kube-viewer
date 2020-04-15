@@ -15,7 +15,7 @@ import (
 
 const (
 	ServiceListScrapperTypes = "ServiceScrapper"
-	ServiceResourceTypes     = "Namespace"
+	ServiceResourceTypes     = "Service"
 )
 
 type ServiceScrapper struct {

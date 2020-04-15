@@ -8,10 +8,11 @@ import (
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/namespace"
 	"github.com/Masterlu1998/kube-viewer/terminal/component"
+	"github.com/Masterlu1998/kube-viewer/terminal/path"
 )
 
-func BuildUpResourceListKeyboardAction() ActionHandler {
-	return func(
+func BuildUpResourceListKeyboardAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/resourceList/keyboard/up", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -20,11 +21,11 @@ func BuildUpResourceListKeyboardAction() ActionHandler {
 	) {
 		tdb.ResourcePanel.ScrollUp()
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildDownResourceListKeyboardAction() ActionHandler {
-	return func(
+func BuildDownResourceListKeyboardAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/resourceList/keyboard/down", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -33,11 +34,11 @@ func BuildDownResourceListKeyboardAction() ActionHandler {
 	) {
 		tdb.ResourcePanel.ScrollDown()
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildUpMenuKeyboardAction() ActionHandler {
-	return func(
+func BuildUpMenuKeyboardAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/menu/keyboard/up", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -46,11 +47,11 @@ func BuildUpMenuKeyboardAction() ActionHandler {
 	) {
 		tdb.Menu.ScrollUp()
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildDownMenuKeyboardAction() ActionHandler {
-	return func(
+func BuildDownMenuKeyboardAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/menu/keyboard/down", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -59,11 +60,11 @@ func BuildDownMenuKeyboardAction() ActionHandler {
 	) {
 		tdb.Menu.ScrollDown()
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildUpDetailKeyboardAction() ActionHandler {
-	return func(
+func BuildUpDetailKeyboardAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/detailParagraph/keyboard/up", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -72,11 +73,11 @@ func BuildUpDetailKeyboardAction() ActionHandler {
 	) {
 		tdb.DetailParagraph.ScrollUp()
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildDownDetailKeyboard() ActionHandler {
-	return func(
+func BuildDownDetailKeyboard(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/detailParagraph/keyboard/down", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -85,11 +86,11 @@ func BuildDownDetailKeyboard() ActionHandler {
 	) {
 		tdb.DetailParagraph.ScrollDown()
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildLeftKeyboardAction() ActionHandler {
-	return func(
+func BuildLeftKeyboardAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/keyboard/left", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -99,11 +100,11 @@ func BuildLeftKeyboardAction() ActionHandler {
 		tdb.NamespaceTab.FocusLeft()
 		sm.ResetNamespace(tdb.NamespaceTab.GetCurrentNamespace())
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildRightKeyboardAction() ActionHandler {
-	return func(
+func BuildRightKeyboardAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/keyboard/right", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -113,11 +114,11 @@ func BuildRightKeyboardAction() ActionHandler {
 		tdb.NamespaceTab.FocusRight()
 		sm.ResetNamespace(tdb.NamespaceTab.GetCurrentNamespace())
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildTabKeyboardAction() ActionHandler {
-	return func(
+func BuildTabKeyboardAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/keyboard/tab", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -127,11 +128,11 @@ func BuildTabKeyboardAction() ActionHandler {
 		tdb.SwitchNextPanel()
 		tdb.ResourcePanel.Reset()
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildBackKeyboardAction() ActionHandler {
-	return func(
+func BuildBackKeyboardAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/keyboard/back", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -142,11 +143,11 @@ func BuildBackKeyboardAction() ActionHandler {
 		sm.StopMainScrapper()
 		tdb.DetailParagraph.Clear()
 		tdb.RenderDashboard()
-	}
+	})
 }
 
-func BuildCollectDebugMessageAction() ActionHandler {
-	return func(
+func BuildCollectDebugMessageAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/debug/collect", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -157,11 +158,11 @@ func BuildCollectDebugMessageAction() ActionHandler {
 			tdb.Console.ShowDebugInfo(m)
 			tdb.RenderDashboard()
 		}
-	}
+	})
 }
 
-func BuildSyncNamespaceAction() ActionHandler {
-	return func(
+func BuildSyncNamespaceAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/namespace/sync", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -185,5 +186,5 @@ func BuildSyncNamespaceAction() ActionHandler {
 			}
 			tdb.RenderDashboard()
 		}
-	}
+	})
 }

@@ -1,12 +1,6 @@
 package component
 
 import (
-	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/node"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/pv"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/pvc"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/secret"
-	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
 	"github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 )
@@ -32,8 +26,8 @@ func buildSideMenu() *sideMenu {
 		{
 			Value: newMenuItem("Cluster", "", ""),
 			Nodes: []*widgets.TreeNode{
-				{Value: newMenuItem("Persistent Volumes", "/"+pv.PVResourceTypes+"/list", pv.PVResourceTypes)},
-				{Value: newMenuItem("Nodes", "/"+node.NodeResourceTypes+"/list", node.NodeResourceTypes)},
+				{Value: newMenuItem("Persistent Volumes", "/PV/list", "PV")},
+				{Value: newMenuItem("Nodes", "/Node/list", "Node")},
 			},
 		},
 		{
@@ -43,15 +37,15 @@ func buildSideMenu() *sideMenu {
 		{
 			Value: newMenuItem("Discovery and Load Balancing", "", ""),
 			Nodes: []*widgets.TreeNode{
-				{Value: newMenuItem("Service", "/"+service.ServiceResourceTypes+"/list", service.ServiceResourceTypes)},
+				{Value: newMenuItem("Service", "/Service/list", "Service")},
 			},
 		},
 		{
 			Value: newMenuItem("Config and Storage", "", ""),
 			Nodes: []*widgets.TreeNode{
-				{Value: newMenuItem("ConfigMaps", "/"+configMap.ConfigMapResourceTypes+"/list", configMap.ConfigMapResourceTypes)},
-				{Value: newMenuItem("Persistent Volume Claims", "/"+pvc.PVCResourceTypes+"/list", pvc.PVCResourceTypes)},
-				{Value: newMenuItem("Secrets", "/"+secret.SecretResourceTypes+"/list", secret.SecretResourceTypes)},
+				{Value: newMenuItem("ConfigMaps", "/ConfigMap/list", "ConfigMap")},
+				{Value: newMenuItem("Persistent Volume Claims", "/PVC/list", "PVC")},
+				{Value: newMenuItem("Secrets", "/Secret/list", "Secret")},
 			},
 		},
 	}

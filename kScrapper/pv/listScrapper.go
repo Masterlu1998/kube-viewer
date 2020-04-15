@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	PVListScrapperTypes = "PVScrapper"
+	PVListScrapperTypes = "PVListScrapper"
 	PVResourceTypes     = "PV"
 )
 

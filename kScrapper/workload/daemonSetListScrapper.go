@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	DaemonSetListScrapperTypes = "DaemonSetScrapper"
+	DaemonSetListScrapperTypes = "DaemonSetListScrapper"
 	DaemonSetResourceTypes     = "DaemonSet"
 )
 

@@ -7,20 +7,13 @@ import (
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/terminal/component"
+	"github.com/Masterlu1998/kube-viewer/terminal/path"
 )
 
 type listDataGetter func(common.KubernetesData) (header []string, data [][]string, widths []int, err error)
 
-type ActionHandler func(
-	ctx context.Context,
-	tdb *component.TerminalDashBoard,
-	sm *kScrapper.ScrapperManagement,
-	dc *debug.DebugCollector,
-	args common.ScrapperArgs,
-)
-
-func listResourceAction(getter listDataGetter, scrapperTypes string) ActionHandler {
-	return func(
+func listResourceAction(getter listDataGetter, tree *path.TrieTree, scrapperTypes string) {
+	tree.RegisterPathWithHandler("/"+scrapperTypes[:len(scrapperTypes)-12]+"/list", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -47,7 +40,7 @@ func listResourceAction(getter listDataGetter, scrapperTypes string) ActionHandl
 			tdb.ResourcePanel.RefreshPanelData(tableHeader, tableData, tableColWidth)
 			tdb.RenderDashboard()
 		}
-	}
+	})
 }
 
 type DetailActionArgs struct {
@@ -55,8 +48,8 @@ type DetailActionArgs struct {
 	Name      string
 }
 
-func detailResourceAction(scrapperTypes string) ActionHandler {
-	return func(
+func detailResourceAction(tree *path.TrieTree, scrapperTypes string) {
+	tree.RegisterPathWithHandler("/"+scrapperTypes[:len(scrapperTypes)-14]+"/search", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -82,5 +75,5 @@ func detailResourceAction(scrapperTypes string) ActionHandler {
 			tdb.DetailParagraph.RefreshData(yamlData)
 			tdb.RenderDashboard()
 		}
-	}
+	})
 }

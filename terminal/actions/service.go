@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/service"
+	"github.com/Masterlu1998/kube-viewer/terminal/path"
 )
 
 var (
@@ -31,10 +32,10 @@ func serviceListDataGetter(c common.KubernetesData) ([]string, [][]string, []int
 	return serviceTableHeader, newServiceTableData, serviceTableColWidth, nil
 }
 
-func BuildServiceListAction() ActionHandler {
-	return listResourceAction(serviceListDataGetter, service.ServiceListScrapperTypes)
+func BuildServiceListAction(tree *path.TrieTree) {
+	listResourceAction(serviceListDataGetter, tree, service.ServiceListScrapperTypes)
 }
 
-func BuildServiceDetailAction() ActionHandler {
-	return detailResourceAction(service.ServiceDetailScrapperTypes)
+func BuildServiceDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, service.ServiceDetailScrapperTypes)
 }

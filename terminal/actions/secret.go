@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/secret"
+	"github.com/Masterlu1998/kube-viewer/terminal/path"
 )
 
 var (
@@ -29,10 +30,10 @@ func secretListDataGetter(c common.KubernetesData) ([]string, [][]string, []int,
 	return secretTableHeader, newSecretTableData, secretTableColWidth, nil
 }
 
-func BuildSecretListAction() ActionHandler {
-	return listResourceAction(secretListDataGetter, secret.SecretListScrapperTypes)
+func BuildSecretListAction(tree *path.TrieTree) {
+	listResourceAction(secretListDataGetter, tree, secret.SecretListScrapperTypes)
 }
 
-func BuildSecretDetailAction() ActionHandler {
-	return detailResourceAction(secret.SecretDetailScrapperTypes)
+func BuildSecretDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, secret.SecretDetailScrapperTypes)
 }

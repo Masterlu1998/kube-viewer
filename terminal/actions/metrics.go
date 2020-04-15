@@ -9,6 +9,7 @@ import (
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/metrics"
 	"github.com/Masterlu1998/kube-viewer/terminal/component"
+	"github.com/Masterlu1998/kube-viewer/terminal/path"
 )
 
 var (
@@ -16,8 +17,8 @@ var (
 	podTableColWidth = []int{15, 12, 12, 12}
 )
 
-func BuildOverviewAction() ActionHandler {
-	return func(
+func BuildOverviewAction(tree *path.TrieTree) {
+	tree.RegisterPathWithHandler("/overview/show", func(
 		ctx context.Context,
 		tdb *component.TerminalDashBoard,
 		sm *kScrapper.ScrapperManagement,
@@ -92,5 +93,5 @@ func BuildOverviewAction() ActionHandler {
 				tdb.RenderDashboard()
 			}
 		}
-	}
+	})
 }

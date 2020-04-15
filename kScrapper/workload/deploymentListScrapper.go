@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	DeploymentListScrapperTypes = "DeploymentScrapper"
+	DeploymentListScrapperTypes = "DeploymentListScrapper"
 	DeploymentResourceTypes     = "Deployment"
 )
 

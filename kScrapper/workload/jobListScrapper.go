@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	JobListScrapperTypes = "JobScrapper"
+	JobListScrapperTypes = "JobListScrapper"
 	JobResourceTypes     = "Job"
 )
 

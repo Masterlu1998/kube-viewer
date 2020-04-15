@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/configMap"
+	"github.com/Masterlu1998/kube-viewer/terminal/path"
 )
 
 var (
@@ -30,10 +31,10 @@ func configMapListDataGetter(c common.KubernetesData) ([]string, [][]string, []i
 	return configMapTableHeader, newConfigMapTableData, configMapTableColWidth, nil
 }
 
-func BuildConfigMapListAction() ActionHandler {
-	return listResourceAction(configMapListDataGetter, configMap.ConfigListMapScrapperTypes)
+func BuildConfigMapListAction(tree *path.TrieTree) {
+	listResourceAction(configMapListDataGetter, tree, configMap.ConfigListMapScrapperTypes)
 }
 
-func BuildConfigMapDetailAction() ActionHandler {
-	return detailResourceAction(configMap.ConfigMapDetailScrapperTypes)
+func BuildConfigMapDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, configMap.ConfigMapDetailScrapperTypes)
 }

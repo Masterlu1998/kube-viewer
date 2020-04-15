@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	CronJobListScrapperTypes = "CronJobScrapper"
+	CronJobListScrapperTypes = "CronJobListScrapper"
 	CronJobResourceTypes     = "CronJob"
 )
 

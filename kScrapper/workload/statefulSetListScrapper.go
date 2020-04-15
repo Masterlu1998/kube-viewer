@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	StatefulSetListScrapperTypes = "StatefulSetScrapper"
+	StatefulSetListScrapperTypes = "StatefulSetListScrapper"
 	StatefulSetResourceTypes     = "StatefulSet"
 )
 

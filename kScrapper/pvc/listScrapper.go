@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	PVCListScrapperTypes = "PVCScrapper"
+	PVCListScrapperTypes = "PVCListScrapper"
 	PVCResourceTypes     = "PVC"
 )
 

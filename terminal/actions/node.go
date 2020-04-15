@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterlu1998/kube-viewer/kScrapper/common"
 	"github.com/Masterlu1998/kube-viewer/kScrapper/node"
+	"github.com/Masterlu1998/kube-viewer/terminal/path"
 )
 
 var (
@@ -31,10 +32,10 @@ func nodeListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, e
 	return nodeTableHeader, newNodeTableData, nodeTableColWidth, nil
 }
 
-func BuildNodeListAction() ActionHandler {
-	return listResourceAction(nodeListDataGetter, node.NodeListScrapperTypes)
+func BuildNodeListAction(tree *path.TrieTree) {
+	listResourceAction(nodeListDataGetter, tree, node.NodeListScrapperTypes)
 }
 
-func BuildNodeDetailAction() ActionHandler {
-	return detailResourceAction(node.NodeDetailScrapperTypes)
+func BuildNodeDetailAction(tree *path.TrieTree) {
+	detailResourceAction(tree, node.NodeDetailScrapperTypes)
 }
