@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	ConfigListMapScrapperTypes = "ConfigMapScrapper"
+	ConfigListMapScrapperTypes = "ConfigMapListScrapper"
 	ConfigMapResourceTypes     = "ConfigMap"
 )
 

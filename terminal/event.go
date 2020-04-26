@@ -38,7 +38,6 @@ type eventListener struct {
 	cancelFunc         context.CancelFunc
 	resourceTypesList  []string
 	pathHandlerTree    *path.TrieTree
-	pathHandlerMap     map[string]path.ActionHandler
 	scrapperManagement *kScrapper.ScrapperManagement
 	debugCollector     *debug.DebugCollector
 }
@@ -53,7 +52,6 @@ func newEventListener(ctx context.Context, tdb *component.TerminalDashBoard, can
 		scrapperManagement: sm,
 		resourceTypesList:  resourceTypesList,
 		pathHandlerTree:    path.BuildTrieTree(),
-		pathHandlerMap:     make(map[string]path.ActionHandler),
 		debugCollector:     dc,
 	}
 }
@@ -85,6 +83,7 @@ func (el *eventListener) Register() {
 	actions.BuildPVCListAction(el.pathHandlerTree)
 	actions.BuildPVListAction(el.pathHandlerTree)
 	actions.BuildNodeListAction(el.pathHandlerTree)
+
 	actions.BuildDeploymentDetailAction(el.pathHandlerTree)
 	actions.BuildStatefulSetDetailAction(el.pathHandlerTree)
 	actions.BuildDaemonSetDetailAction(el.pathHandlerTree)
@@ -112,11 +111,9 @@ func (el *eventListener) Listen() error {
 			el.cancelFunc()
 			return nil
 		case "b":
-			path := "/" + keyboardActionTypes + "/back"
-			el.executeHandler(path, nil)
+			el.executeHandler("/"+keyboardActionTypes+"/back", nil)
 		case "<Tab>":
-			path := "/" + keyboardActionTypes + "/tab"
-			el.executeHandler(path, nil)
+			el.executeHandler("/"+keyboardActionTypes+"/tab", nil)
 		case "<Enter>":
 			var (
 				path string
@@ -138,11 +135,9 @@ func (el *eventListener) Listen() error {
 			}
 			el.executeHandler(path, args)
 		case "<Left>":
-			path := "/" + keyboardActionTypes + "/left"
-			el.executeHandler(path, nil)
+			el.executeHandler("/"+keyboardActionTypes+"/left", nil)
 		case "<Right>":
-			path := "/" + keyboardActionTypes + "/right"
-			el.executeHandler(path, nil)
+			el.executeHandler("/"+keyboardActionTypes+"/right", nil)
 		case "<Up>":
 			var p string
 			switch el.terminalDashBoard.GetCurrentGrid() {
@@ -183,17 +178,6 @@ func (el *eventListener) executeHandler(p string, args common.ScrapperArgs) {
 		return
 	}
 
-	if handler, ok := el.pathHandlerMap[p]; ok {
-		go handler(
-			el.ctx,
-			el.terminalDashBoard,
-			el.scrapperManagement,
-			el.debugCollector,
-			args,
-		)
-		el.debugCollector.Collect(debug.NewDebugMessage(debug.Info, fmt.Sprintf("excute path: %s", p), "eventListener"))
-		return
-	}
 	el.debugCollector.Collect(debug.NewDebugMessage(debug.Warn, fmt.Sprintf("no action match p: %s", p), "eventListener"))
 }
 

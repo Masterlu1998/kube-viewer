@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	ServiceListScrapperTypes = "ServiceScrapper"
+	ServiceListScrapperTypes = "ServiceListScrapper"
 	ServiceResourceTypes     = "Service"
 )
 

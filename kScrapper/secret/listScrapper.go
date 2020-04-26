@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	SecretListScrapperTypes = "SecretScrapper"
+	SecretListScrapperTypes = "SecretListScrapper"
 	SecretResourceTypes     = "Secret"
 )
 
