@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"math"
+	"strconv"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
@@ -10,6 +11,7 @@ import (
 	"github.com/Masterlu1998/kube-viewer/kScrapper/metrics"
 	"github.com/Masterlu1998/kube-viewer/terminal/component"
 	"github.com/Masterlu1998/kube-viewer/terminal/path"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 var (
@@ -54,7 +56,12 @@ func BuildOverviewAction(tree *path.TrieTree) {
 				podMetricList := rawPodMetricList.([]*metrics.PodMetricsInfo)
 				data := make([][]string, 0)
 				for _, item := range podMetricList {
-					col := []string{item.Name, item.NameSpace, item.CPUUsage.String(), item.MemoryUsage.String()}
+					col := []string{
+						item.Name,
+						item.NameSpace,
+						strconv.FormatFloat(float64(int(item.CPUUsage.ScaledValue(resource.Micro)))/10000, 'f', 2, 64) + "%",
+						strconv.Itoa(int(item.MemoryUsage.Value())/1024) + "MB",
+					}
 					data = append(data, col)
 				}
 				tdb.ResourcePanel.RefreshPanelData(podTableHeader, data, podTableColWidth)

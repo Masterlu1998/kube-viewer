@@ -41,7 +41,6 @@ func NewScrapperManagement(ctx context.Context, collector *debug.DebugCollector)
 
 	kubeLister := kube.NewKubeLister(ctx, kubeClient)
 
-	// TODO: I will make a factory to create scrapper
 	sMap := map[string]Scrapper{
 		workload.DeploymentListScrapperTypes:  workload.NewDeploymentListScrapper(kubeLister, kubeClient, collector),
 		workload.StatefulSetListScrapperTypes: workload.NewStatefulSetListScrapper(kubeLister, kubeClient, collector),

@@ -11,7 +11,7 @@ type cpuUsageBarChart struct {
 
 func buildCPUUsageBarChart() *cpuUsageBarChart {
 	cpuBarChart := widgets.NewBarChart()
-	cpuBarChart.Title = "CPU Usage"
+	cpuBarChart.Title = "CPU Usage (%)"
 	cpuBarChart.Data = []float64{}
 	cpuBarChart.Labels = []string{}
 	cpuBarChart.BarWidth = 10
@@ -34,7 +34,7 @@ type memoryUsageBarChart struct {
 
 func buildMemoryUsageBarChart() *memoryUsageBarChart {
 	memoryChart := widgets.NewBarChart()
-	memoryChart.Title = "Memory Usage"
+	memoryChart.Title = "Memory Usage (%)"
 	memoryChart.Data = []float64{}
 	memoryChart.BarWidth = 10
 	memoryChart.BarColors = []ui.Color{ui.ColorWhite, ui.ColorWhite}

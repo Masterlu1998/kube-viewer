@@ -205,16 +205,16 @@ func (t *TerminalDashBoard) buildOverviewGrid() *ui.Grid {
 }
 
 func (t *TerminalDashBoard) SwitchNextPanel() {
-	t.selectPanel()
+	t.selectPanelToggle()
 	t.selectedPanel = t.selectedPanel.next
-	t.selectPanel()
+	t.selectPanelToggle()
 }
 
 func (t *TerminalDashBoard) GetCurrentPanelTypes() PanelTypes {
 	return t.selectedPanel.types
 }
 
-func (t *TerminalDashBoard) selectPanel() {
+func (t *TerminalDashBoard) selectPanelToggle() {
 	switch t.selectedPanel.types {
 	case MenuPanel:
 		t.Menu.selectedToggle()

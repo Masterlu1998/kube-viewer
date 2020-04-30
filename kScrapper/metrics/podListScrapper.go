@@ -70,15 +70,8 @@ func (w *PodMetricsListScrapper) scrapeDataIntoCh(args common.ScrapperArgs) (com
 
 func convertItemToPodMetricInfo(m unstructured.Unstructured) (*PodMetricsInfo, error) {
 	containers, _, _ := unstructured.NestedSlice(m.Object, "containers")
-	totalCPUUsage, err := resource.ParseQuantity("0")
-	if err != nil {
-		return nil, err
-	}
-
-	totalMemoryUsage, err := resource.ParseQuantity("0")
-	if err != nil {
-		return nil, err
-	}
+	totalCPUUsage := resource.NewQuantity(0, resource.DecimalSI)
+	totalMemoryUsage := resource.NewQuantity(0, resource.DecimalSI)
 
 	for _, c := range containers {
 		obj, ok := c.(map[string]interface{})
@@ -89,15 +82,8 @@ func convertItemToPodMetricInfo(m unstructured.Unstructured) (*PodMetricsInfo, e
 		rawCPUPerContainer, _, _ := unstructured.NestedString(obj, "usage", "cpu")
 		rawMemoryPerContainer, _, _ := unstructured.NestedString(obj, "usage", "memory")
 
-		cpuPerContainer, err := resource.ParseQuantity(rawCPUPerContainer)
-		if err != nil {
-			return nil, err
-		}
-
-		memoryPerContainer, err := resource.ParseQuantity(rawMemoryPerContainer)
-		if err != nil {
-			return nil, err
-		}
+		cpuPerContainer := resource.MustParse(rawCPUPerContainer)
+		memoryPerContainer := resource.MustParse(rawMemoryPerContainer)
 
 		totalCPUUsage.Add(cpuPerContainer)
 		totalMemoryUsage.Add(memoryPerContainer)
@@ -106,8 +92,8 @@ func convertItemToPodMetricInfo(m unstructured.Unstructured) (*PodMetricsInfo, e
 	metricsInfo := &PodMetricsInfo{
 		Name:        m.GetName(),
 		NameSpace:   m.GetNamespace(),
-		CPUUsage:    &totalCPUUsage,
-		MemoryUsage: &totalMemoryUsage,
+		CPUUsage:    totalCPUUsage,
+		MemoryUsage: totalMemoryUsage,
 	}
 	return metricsInfo, nil
 }
