@@ -16,7 +16,7 @@ import (
 
 var (
 	podTableHeader   = []string{"name", "namespace", "cpu usage", "memory usage"}
-	podTableColWidth = []int{15, 12, 12, 12}
+	podTableColWidth = []int{22, 12, 12, 12}
 )
 
 func BuildOverviewAction(tree *path.TrieTree) {

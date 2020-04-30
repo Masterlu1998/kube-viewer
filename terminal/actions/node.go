@@ -10,7 +10,7 @@ import (
 
 var (
 	nodeTableHeader   = []string{"name", "status", "roles", "address", "OSImage"}
-	nodeTableColWidth = []int{20, 20, 15, 30, 20}
+	nodeTableColWidth = []int{12, 10, 10, 30, 20}
 )
 
 func nodeListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, error) {

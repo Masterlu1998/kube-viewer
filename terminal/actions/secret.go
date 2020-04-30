@@ -10,7 +10,7 @@ import (
 
 var (
 	secretTableHeader   = []string{"name", "namespace", "create time"}
-	secretTableColWidth = []int{40, 25, 40}
+	secretTableColWidth = []int{35, 25, 20}
 )
 
 func secretListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, error) {

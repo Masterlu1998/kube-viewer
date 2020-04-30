@@ -10,7 +10,7 @@ import (
 
 var (
 	serviceTableHeader   = []string{"name", "namespace", "clusterIP", "ports"}
-	serviceTableColWidth = []int{30, 25, 20, 50}
+	serviceTableColWidth = []int{20, 17, 15, 28}
 )
 
 func serviceListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, error) {

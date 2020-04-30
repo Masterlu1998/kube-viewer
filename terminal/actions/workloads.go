@@ -10,7 +10,7 @@ import (
 
 var (
 	workloadTableHeader   = []string{"name", "namespace", "pods", "create time", "images"}
-	workloadTableColWidth = []int{40, 22, 10, 30, 40}
+	workloadTableColWidth = []int{20, 12, 5, 25, 20}
 )
 
 func workloadListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, error) {

@@ -10,7 +10,7 @@ import (
 
 var (
 	configMapTableHeader   = []string{"name", "namespace", "create time"}
-	configMapTableColWidth = []int{40, 25, 40}
+	configMapTableColWidth = []int{35, 25, 20}
 )
 
 func configMapListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, error) {

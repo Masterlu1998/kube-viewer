@@ -10,7 +10,7 @@ import (
 
 var (
 	pvcTableHeader   = []string{"name", "namespace", "status", "volume", "request", "limit", "accessMode", "storageClass", "create time"}
-	pvcTableColWidth = []int{20, 20, 20, 20, 20, 20, 20, 20, 20}
+	pvcTableColWidth = []int{10, 10, 10, 10, 10, 10, 15, 10, 10}
 )
 
 func pvcListDataGetter(c common.KubernetesData) ([]string, [][]string, []int, error) {
