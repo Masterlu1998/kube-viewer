@@ -3,7 +3,9 @@ package actions
 import (
 	"context"
 	"math"
+	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/Masterlu1998/kube-viewer/debug"
 	"github.com/Masterlu1998/kube-viewer/kScrapper"
@@ -95,10 +97,21 @@ func BuildOverviewAction(tree *path.TrieTree) {
 				}
 				tdb.MemoryUsageBarChart.RefreshDataWithLabel(memoryData, labels)
 				tdb.CPUUsageBarChart.RefreshDataWithLabel(cpuData, labels)
-				tdb.MemoryResourceGauge.RefreshData(int(usageMemory) * 100 / int(totalMemory))
-				tdb.CPUResourceGauge.RefreshData(int(usageCPU) * 100 / int(totalCPU))
+				tdb.MemoryResourceGauge.RefreshData(generateIntFloatData(int(usageMemory) * 100 / int(totalMemory)))
+				tdb.CPUResourceGauge.RefreshData(generateIntFloatData((int(usageCPU)) * 100 / int(totalCPU)))
 				tdb.RenderDashboard()
 			}
 		}
 	})
+}
+
+func generateIntFloatData(realData int) int {
+	rand.Seed(time.Now().UnixNano())
+	floatData := rand.Intn(4)
+
+	if rand.Int()%2 == 0 {
+		return realData + floatData
+	}
+
+	return realData - floatData
 }
