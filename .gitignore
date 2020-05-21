@@ -18,4 +18,4 @@
 # vendor/
 
 # kubeconfig file
-/kube/admin.conf
+# /kube/admin.conf
