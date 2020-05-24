@@ -61,6 +61,7 @@ type TerminalDashBoard struct {
 	MemoryUsageBarChart *memoryUsageBarChart
 	CPUResourceGauge    *cpuResourceGauge
 	MemoryResourceGauge *memoryResourceGauge
+	LineChart           *lineChart
 	selectedPanel       *panelNode
 	currentGridTypes    GridTypes
 }
@@ -90,6 +91,9 @@ func InitDashBoard() *TerminalDashBoard {
 	cpuResourceGauge := buildCPUResourceGauge()
 	memoryResourceGauge := buildMemoryResourceGauge()
 
+	// line chart
+	lineChart := buildLineChart()
+
 	// init selected panel list
 	headPanelNode := initPanelLinkedList()
 
@@ -103,6 +107,7 @@ func InitDashBoard() *TerminalDashBoard {
 		MemoryUsageBarChart: memoryBarChart,
 		CPUResourceGauge:    cpuResourceGauge,
 		MemoryResourceGauge: memoryResourceGauge,
+		LineChart:           lineChart,
 		selectedPanel:       headPanelNode,
 	}
 
@@ -190,9 +195,10 @@ func (t *TerminalDashBoard) buildOverviewGrid() *ui.Grid {
 		ui.NewRow(11.0/12,
 			ui.NewCol(3.0/14, ui.NewRow(1, t.Menu)),
 			ui.NewCol(8.0/14,
-				ui.NewRow(1.0/6, t.CPUResourceGauge),
-				ui.NewRow(1.0/6, t.MemoryResourceGauge),
-				ui.NewRow(4.0/6, t.ResourcePanel),
+				ui.NewRow(2.0/10, t.CPUResourceGauge),
+				ui.NewRow(2.0/10, t.MemoryResourceGauge),
+				ui.NewRow(6.0/10, t.LineChart),
+				// ui.NewRow(3.0/10, t.ResourcePanel),
 			),
 			ui.NewCol(3.0/14,
 				ui.NewRow(1.0/2, t.CPUUsageBarChart),

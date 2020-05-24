@@ -19,6 +19,7 @@ import (
 var (
 	podTableHeader   = []string{"name", "namespace", "cpu usage", "memory usage"}
 	podTableColWidth = []int{22, 12, 12, 12}
+	CPUUsageCache    = make([]float64, 0, 60)
 )
 
 func BuildOverviewAction(tree *path.TrieTree) {
@@ -79,7 +80,7 @@ func BuildOverviewAction(tree *path.TrieTree) {
 				var totalCPU, usageCPU, totalMemory, usageMemory int64
 				labels := make([]string, 0)
 				for _, item := range nodeMetricList {
-					labels = append(labels, item.Name)
+					labels = append(labels, item.CPUTotal.String()+" Cores")
 
 					memoryUsageInt64 := item.MemoryUsage.MilliValue()
 					memoryTotalInt64 := item.MemoryTotal.MilliValue()
@@ -97,8 +98,20 @@ func BuildOverviewAction(tree *path.TrieTree) {
 				}
 				tdb.MemoryUsageBarChart.RefreshDataWithLabel(memoryData, labels)
 				tdb.CPUUsageBarChart.RefreshDataWithLabel(cpuData, labels)
-				tdb.MemoryResourceGauge.RefreshData(generateIntFloatData(int(usageMemory) * 100 / int(totalMemory)))
-				tdb.CPUResourceGauge.RefreshData(generateIntFloatData((int(usageCPU)) * 100 / int(totalCPU)))
+				finalUsageMemoryData := generateIntFloatData(int(usageMemory) * 100 / int(totalMemory))
+				finalUsageCPUData := generateIntFloatData((int(usageCPU)) * 100 / int(totalCPU))
+				tdb.MemoryResourceGauge.RefreshData(finalUsageMemoryData)
+				tdb.CPUResourceGauge.RefreshData(finalUsageCPUData)
+
+				if len(CPUUsageCache) == 60 {
+					CPUUsageCache = CPUUsageCache[1:]
+				}
+				CPUUsageCache = append(CPUUsageCache, float64(finalUsageCPUData))
+
+				if len(CPUUsageCache) >= 2 {
+					tdb.LineChart.RefreshData([][]float64{CPUUsageCache})
+				}
+
 				tdb.RenderDashboard()
 			}
 		}
